@@ -1,0 +1,25 @@
+DESCRIPTION="A Windows software package providing an interface similar to a Unix pty-master for communicating with Windows console programs"
+HOMEPAGE="https://github.com/rprichard/winpty"
+
+SRC_URI="https://github.com/rprichard/${PN}/archive/release-${PV}.tar.gz"
+SRC_DIR="${PN}-release-${PV}"
+
+# The "src" package is created by default.
+PKG_COMPTYPES="bin doc lic"
+PKG_CONTENTS[0]="bin/*.exe bin/*.dll"
+PKG_CONTENTS[1]="share/doc/winpty/${PV}/NOTES.txt"
+PKG_CONTENTS[2]="share/doc/winpty/${PV}/LICENSE"
+
+src_compile() {
+  # Mirror the source into the build directory.
+  lndirs
+
+  cd ${B}
+  mgwconf
+  mgwmake
+}
+
+src_install() {
+  cd ${B}
+  PREFIX=${D}/mingw mgwinstall
+}

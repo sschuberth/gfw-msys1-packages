@@ -1,0 +1,69 @@
+DESCRIPTION="The Minimal SYStem is a light-weight fork of Cygwin 1.3 offering
+a Bourne Shell command line environment to port Unix applications to Windows."
+HOMEPAGE="http://www.mingw.org/"
+SRC_URI="mirror://sourceforge/mingw/${PF}-${PS}-${PV}-src.tar.lzma"
+SRC_DIR="source"
+
+PKG_COMPTYPES="bin ext dev doc lic"
+PKG_CONTENTS[0]="bin/msys-1.0.dll
+                 bin/msysmnt.exe
+                 bin/ps.exe
+                 bin/error-mode.exe
+                 etc/fstab.sample
+                 etc/inputrc.default
+                 etc/profile
+                 m.ico
+                 msys.ico"
+PKG_CONTENTS[1]="bin/cls
+                 bin/clsb
+                 bin/cmd
+                 bin/ftp
+                 bin/lnkcnv
+                 bin/mount
+                 bin/msysinfo
+                 bin/start
+                 bin/umount
+                 bin/which
+                 postinstall
+                 msys.bat"
+PKG_CONTENTS[2]="include
+                 lib"
+PKG_CONTENTS[3]="share/doc/MSYS/MSYS_MISSION
+                 share/doc/MSYS/MSYS_VS_CYGWIN
+                 share/doc/MSYS/MSYS_WELCOME.rtf
+                 share/doc/MSYS/README.rtf
+                 share/doc/MSYS/${PF}-${PS}-RELEASE_NOTES.txt"
+PKG_CONTENTS[4]="share/doc/MSYS/COPYING
+                 share/doc/MSYS/COPYING.LIB
+                 share/doc/MSYS/CYGWIN_LICENSE
+                 share/doc/MSYS/MSYS_LICENSE.rtf"
+
+src_compile() {
+  cd ${B}
+  mgwconf
+
+  W32API_CPPFLAGS=-I/usr/include/w32api \
+  W32API_LDFLAGS=-L/usr/lib/w32api \
+  mgwmake
+}
+
+src_install() {
+  cd ${B}
+  USE_DESTDIR=0
+  mgwinstall
+
+  # The install functions provided by mgwport, despite the ones from Gentoo's ebuild, do not
+  # support recursion which makes them unflexible to use, so use plain commands instead.
+  cd ${D}/usr
+  cp -a ${srcdir}/base-files/* .
+
+  rm -rf include lib
+  mv i686-pc-msys/include include
+  mv i686-pc-msys/lib lib
+  rmdir i686-pc-msys
+
+  mv bin/mount.exe bin/msysmnt.exe
+
+  mkdir -p share/doc/MSYS
+  cp -p ${srcdir}/${PN}.RELEASE_NOTES.txt share/doc/MSYS/${PF}-${PS}-RELEASE_NOTES.txt
+}

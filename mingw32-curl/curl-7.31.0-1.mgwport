@@ -12,13 +12,19 @@ PKG_CONTENTS[1]="share/doc
                  --exclude share/doc/${PN}/${PV}/COPYING"
 PKG_CONTENTS[2]="share/doc/${PN}/${PV}/COPYING"
 PKG_CONTENTS[3]="include lib/*.a"
-PKG_CONTENTS[4]="bin/*.dll"
+PKG_CONTENTS[4]="bin/*.dll bin/*.crt"
 
 src_compile() {
   lndirs
   cd ${B}
-  export CFG="-ipv6 -zlib -sspi -winssl -spnego -ldaps"
-  make mingw32
+
+  CFG="-ipv6 -zlib -sspi -ssl -spnego -ldaps" \
+  OPENSSL_PATH=/mingw \
+  OPENSSL_LIBPATH=/mingw/lib \
+  OPENSSL_LIBS='-lcrypto.dll -lssl.dll' \
+  mgwmake mingw32
+
+  mgwmake ca-bundle
 }
 
 src_install() {
@@ -31,6 +37,10 @@ src_install() {
   dobin lib/libcurl*dll
   dobin src/curl.exe
 
+  mv lib/ca-bundle.crt lib/curl-ca-bundle.crt 
+  insinto /mingw/bin
+  doins lib/curl-ca-bundle.crt
+  
   insinto /mingw/include/curl
   doins include/curl/*.h
 

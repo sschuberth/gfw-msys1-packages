@@ -1,4 +1,15 @@
-# Creating mingw-get packages
+## Git configuration for LZMA (de-)compression
+
+For convenience, the _*.xml.lzma_ files are supposed to be (de-)compressed on-the-fly when checked out / in. To make this work you have to add the following diff and smudge / clean filters to your Git config file:
+
+    [diff "lzma"]
+    	textconv = lzma -d -c
+    	cachetextconv = true
+    [filter "lzma"]
+    	smudge = lzma -d
+    	clean = lzma -z
+
+## Creating mingw-get packages
 
 If you want to create a new package for use with mingw-get the following steps are necessary:
 

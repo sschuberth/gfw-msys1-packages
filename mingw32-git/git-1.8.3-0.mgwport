@@ -29,4 +29,8 @@ src_test() {
 src_install() {
   cd ${B}
   mgwinstall
+
+  insinto /mingw/etc
+  doins ../../gitconfig
+  make_etc_defaults /mingw/etc/gitconfig
 }

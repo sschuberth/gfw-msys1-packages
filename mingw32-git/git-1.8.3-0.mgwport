@@ -18,7 +18,7 @@ src_compile() {
   # Be explicit about the version as we cannot rely on git-describe nor the default.
   echo "${PV}.msysgit.${PR}" > version
 
-  mgwmake prefix=${D}/mingw
+  mgwmake prefix=${D}/mingw bindir=${D}/mingw/bin/
 }
 
 src_test() {

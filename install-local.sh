@@ -1,6 +1,12 @@
 #!/bin/sh
 
-for path in $(find . -name "*.tar.lzma" -not -name "*-src.*"); do
+paths=$@
+
+if test -z "$paths"; then
+  paths=.
+fi
+
+for path in $(find $paths -maxdepth 2 -name "*.tar.lzma" -not -name "*-src.*"); do
     case $(basename $path) in
     *mingw32*)
         tar vxf $path -C /mingw/

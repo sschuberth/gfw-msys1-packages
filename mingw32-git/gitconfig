@@ -1,2 +1,2 @@
 [http]
-	sslCAInfo = /mingw/bin/curl-ca-bundle.crt
+	sslCAInfo = /bin/curl-ca-bundle.crt

@@ -32,5 +32,8 @@ src_install() {
 
   insinto /mingw/etc
   doins ../../gitconfig
-  make_etc_defaults /mingw/etc/gitconfig
+
+  # TODO: Switch over to using make_etc_defaults as soon as it is implemented, see
+  # the NOTE in mingw/share/doc/mgwport/0.10.6/README.
+  #make_etc_defaults /mingw/etc/gitconfig
 }

@@ -9,6 +9,8 @@ For convenience, the _*.xml.lzma_ files are supposed to be (de-)compressed on-th
     	smudge = lzma -d
     	clean = lzma -z
 
+If you let the mingwGitDevEnv installer clone the packages repository this is already done for you.
+
 ## Creating mingw-get packages
 
 If you want to create a new package for use with mingw-get the following steps are necessary:

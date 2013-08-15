@@ -28,5 +28,6 @@ src_test() {
 
 src_install() {
   cd ${B}
-  _MGWPORT_RESTRICT_native_prefix_=1 mgwinstall USE_DESTDIR=1 DESTDIR=${D}/mingw
+  USE_DESTDIR=1
+  _MGWPORT_RESTRICT_native_prefix_=1 mgwinstall DESTDIR=${D}/mingw
 }

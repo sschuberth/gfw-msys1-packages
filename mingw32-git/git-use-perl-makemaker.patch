@@ -1,0 +1,10 @@
+--- config.mak.uname.orig	Sat Jun  1 11:37:37 2013
++++ config.mak.uname	Mon Aug 26 09:58:36 2013
+@@ -483,7 +483,6 @@
+ 	NO_MKDTEMP = YesPlease
+ 	NO_MKSTEMPS = YesPlease
+ 	NO_SVN_TESTS = YesPlease
+-	NO_PERL_MAKEMAKER = YesPlease
+ 	RUNTIME_PREFIX = YesPlease
+ 	NO_ST_BLOCKS_IN_STRUCT_STAT = YesPlease
+ 	NO_NSEC = YesPlease

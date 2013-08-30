@@ -1,11 +1,8 @@
 DESCRIPTION="Git distributed version control system"
 HOMEPAGE="http://git-scm.com/"
 
-SRC_URI="https://github.com/msysgit/${PN}/archive/v${PV}.msysgit.${PR}.tar.gz"
-SRC_DIR="${P}.msysgit.${PR}"
-
-PATCH_URI="git-do-not-install-built-ins.mingw32.patch
-           git-use-perl-makemaker.patch"
+SRC_URI="https://github.com/sschuberth/${PN}/archive/v${PV}.mingw.${PR}.tar.gz"
+SRC_DIR="${P}.mingw.${PR}"
 
 src_compile() {
   # Mirror the source into the build directory.

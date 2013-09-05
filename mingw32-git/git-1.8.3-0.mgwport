@@ -4,6 +4,16 @@ HOMEPAGE="http://git-scm.com/"
 SRC_URI="https://github.com/sschuberth/${PN}/archive/v${PV}.mingw.${PR}.tar.gz"
 SRC_DIR="${P}.mingw.${PR}"
 
+PKG_COMPTYPES="bin doc lic"
+PKG_CONTENTS[0]="bin
+                 libexec
+                 share
+                 --exclude share/doc
+                 usr"
+PKG_CONTENTS[1]="share/doc
+                 --exclude share/doc/${PN}/${PV}/COPYING"
+PKG_CONTENTS[2]="share/doc/${PN}/${PV}/COPYING"
+
 src_compile() {
   # Mirror the source into the build directory.
   lndirs

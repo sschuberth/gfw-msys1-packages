@@ -4,9 +4,9 @@ HOMEPAGE="http://git-scm.com/"
 # The commit in the git-htmldocs repository that matches this version of git.
 HTMLDOCS_COMMIT=b6595471f5299e8b13181e09072b486dd0ad6261
 
-SRC_URI="https://github.com/sschuberth/${PN}/archive/v${PV}.mingw.${PR}.tar.gz
+SRC_URI="https://github.com/sschuberth/${PN}/archive/v${PV}-mingw-${PR}.tar.gz
          https://github.com/gitster/git-htmldocs/archive/${HTMLDOCS_COMMIT}.tar.gz"
-SRC_DIR="${P}.mingw.${PR}"
+SRC_DIR="${P}-mingw-${PR}"
 
 HTMLDOCS_PATH=${srcdir}/git-htmldocs-${HTMLDOCS_COMMIT}
 HTMLDOCS="${HTMLDOCS_PATH}/*.html"
@@ -32,7 +32,7 @@ src_compile() {
 
   # Be explicit about the version as we cannot rely on git-describe nor the default
   # from GIT-VERSION-GEN.
-  echo "${PV}.mingw.${PR}" > version
+  echo "${PV}-mingw-${PR}" > version
 
   mgwmake
 }

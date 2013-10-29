@@ -14,11 +14,13 @@ HTMLDOCS="${HTMLDOCS_PATH}/*.html"
 PKG_COMPTYPES="bin ext doc lic"
 PKG_CONTENTS[0]="bin
                  libexec
+                 --exclude libexec/git-core/git-contacts
                  --exclude libexec/git-core/git-subtree
                  share
                  --exclude share/doc
                  usr"
-PKG_CONTENTS[1]="libexec/git-core/git-subtree"
+PKG_CONTENTS[1]="libexec/git-core/git-contacts
+                 libexec/git-core/git-subtree"
 PKG_CONTENTS[2]="share/doc
                  --exclude share/doc/${PN}/${PV}/COPYING"
 PKG_CONTENTS[3]="share/doc/${PN}/${PV}/COPYING"
@@ -59,4 +61,7 @@ src_install() {
 
   # Remove the current directory from PATH so that the "INSTALL" text file is not being executed in favor of the "install" binary.
   (cd subtree && _MGWPORT_RESTRICT_native_prefix_=1 PATH=${PATH#.:} mgwinstall prefix=/mingw)
+
+  exeinto /mingw/libexec/git-core
+  doexe contacts/git-contacts
 }

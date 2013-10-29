@@ -3,16 +3,20 @@ implementation and includes sftp client and server support."
 HOMEPAGE="http://www.openssh.org"
 SRC_URI="http://ftp.spline.de/pub/OpenBSD/OpenSSH/portable/${PN}-${PV}.tar.gz"
 
-PKG_NAMES="${PN} ${PN} ${PN}"
+PKG_NAMES="${PN} ${PN} ${PN} ${PN}"
 
 prefix=/usr
 
-PKG_COMPTYPES="bin doc lic"
+PKG_COMPTYPES="bin ext doc lic"
 
-PKG_CONTENTS[0]="bin lib etc"
-PKG_CONTENTS[1]="share/man share/doc
+PKG_CONTENTS[0]="bin
+                 --exclude bin/ssh-copy-id
+                 lib
+                 etc"
+PKG_CONTENTS[1]="bin/ssh-copy-id"
+PKG_CONTENTS[2]="share/man share/doc
                  --exclude share/doc/${PN}/${PV}/LICENCE"
-PKG_CONTENTS[2]="share/doc/${PN}/${PV}/LICENCE"
+PKG_CONTENTS[3]="share/doc/${PN}/${PV}/LICENCE"
 
 MGWCONF_ARGS="--without-rpath \
               --sysconfdir=/etc/ssh \
@@ -146,4 +150,10 @@ src_install() {
   rm -f ${D}${prefix}/share/man/man5/sshd_config.5
 
   mv -f ${D}/etc ${D}${prefix}/
+
+  # Install contributed stuff to be included into the "ext" package.
+  cd ${S}/contrib
+
+  exeinto ${prefix}/bin
+  doexe ssh-copy-id
 }

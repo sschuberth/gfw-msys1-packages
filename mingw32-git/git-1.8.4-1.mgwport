@@ -31,7 +31,7 @@ src_compile() {
   touch ../THIS_IS_MSYSGIT
 
   # Be explicit about the version as we cannot rely on git-describe nor the default
-  # from GIT-VERSION-GEN.
+  # value in GIT-VERSION-GEN.
   echo "${PV}-mingw-${PR}" > version
 
   mgwmake

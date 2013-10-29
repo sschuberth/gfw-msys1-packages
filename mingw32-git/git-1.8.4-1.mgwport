@@ -11,15 +11,17 @@ SRC_DIR="${P}-mingw-${PR}"
 HTMLDOCS_PATH=${srcdir}/git-htmldocs-${HTMLDOCS_COMMIT}
 HTMLDOCS="${HTMLDOCS_PATH}/*.html"
 
-PKG_COMPTYPES="bin doc lic"
+PKG_COMPTYPES="bin ext doc lic"
 PKG_CONTENTS[0]="bin
                  libexec
+                 --exclude libexec/git-core/git-subtree
                  share
                  --exclude share/doc
                  usr"
-PKG_CONTENTS[1]="share/doc
+PKG_CONTENTS[1]="libexec/git-core/git-subtree"
+PKG_CONTENTS[2]="share/doc
                  --exclude share/doc/${PN}/${PV}/COPYING"
-PKG_CONTENTS[2]="share/doc/${PN}/${PV}/COPYING"
+PKG_CONTENTS[3]="share/doc/${PN}/${PV}/COPYING"
 
 src_compile() {
   # Mirror the source into the build directory.
@@ -51,4 +53,10 @@ src_install() {
   dodoc ${HTMLDOCS_PATH}/howto/*.html
   docinto html/technical
   dodoc ${HTMLDOCS_PATH}/technical/*.html
+
+  # Install contributed stuff to be included into the "ext" package.
+  cd contrib
+
+  # Remove the current directory from PATH so that the "INSTALL" text file is not being executed in favor of the "install" binary.
+  (cd subtree && _MGWPORT_RESTRICT_native_prefix_=1 PATH=${PATH#.:} mgwinstall prefix=/mingw)
 }

@@ -1,0 +1,313 @@
+--- origsrc/openssh-6.5p1/Makefile.in	2014-01-27 06:35:04 +0000
++++ src/openssh-6.5p1/Makefile.in	2014-01-30 22:07:51 +0000
+@@ -60,6 +60,7 @@ XAUTH_PATH=@XAUTH_PATH@
+ LDFLAGS=-L. -Lopenbsd-compat/ @LDFLAGS@
+ EXEEXT=@EXEEXT@
+ MANFMT=@MANFMT@
++LN_S=cp -p
+ 
+ TARGETS=ssh$(EXEEXT) sshd$(EXEEXT) ssh-add$(EXEEXT) ssh-keygen$(EXEEXT) ssh-keyscan${EXEEXT} ssh-keysign${EXEEXT} ssh-pkcs11-helper$(EXEEXT) ssh-agent$(EXEEXT) scp$(EXEEXT) sftp-server$(EXEEXT) sftp$(EXEEXT)
+ 
+@@ -289,10 +290,10 @@ install-files:
+ 	$(INSTALL) -m 644 sftp-server.8.out $(DESTDIR)$(mandir)/$(mansubdir)8/sftp-server.8
+ 	$(INSTALL) -m 644 ssh-keysign.8.out $(DESTDIR)$(mandir)/$(mansubdir)8/ssh-keysign.8
+ 	$(INSTALL) -m 644 ssh-pkcs11-helper.8.out $(DESTDIR)$(mandir)/$(mansubdir)8/ssh-pkcs11-helper.8
+-	-rm -f $(DESTDIR)$(bindir)/slogin
+-	ln -s ./ssh$(EXEEXT) $(DESTDIR)$(bindir)/slogin
++	-rm -f $(DESTDIR)$(bindir)/slogin$(EXEEXT)
++	(cd $(DESTDIR)$(bindir) && $(LN_S) ssh$(EXEEXT) slogin$(EXEEXT) )
+ 	-rm -f $(DESTDIR)$(mandir)/$(mansubdir)1/slogin.1
+-	ln -s ./ssh.1 $(DESTDIR)$(mandir)/$(mansubdir)1/slogin.1
++	(cd $(DESTDIR)/$(mandir)/$(mansubdir)1 && $(LN_S) ssh.1 slogin.1 )
+ 
+ install-sysconf:
+ 	if [ ! -d $(DESTDIR)$(sysconfdir) ]; then \
+@@ -397,7 +398,7 @@ uninstall:
+ regress/modpipe$(EXEEXT): $(srcdir)/regress/modpipe.c
+ 	[ -d `pwd`/regress ]  ||  mkdir -p `pwd`/regress
+ 	[ -f `pwd`/regress/Makefile ]  || \
+-	    ln -s `cd $(srcdir) && pwd`/regress/Makefile `pwd`/regress/Makefile
++            $(LN_S) `cd $(srcdir) && pwd`/regress/Makefile `pwd`/regress/Makefile
+ 	$(CC) $(CFLAGS) $(CPPFLAGS) -o $@ $? \
+ 	$(LDFLAGS) -lssh -lopenbsd-compat -lssh -lopenbsd-compat $(LIBS)
+ 
+--- origsrc/openssh-6.5p1/configure.ac	2014-01-30 00:26:46 +0000
++++ src/openssh-6.5p1/configure.ac	2014-01-30 22:07:51 +0000
+@@ -550,6 +550,23 @@ case "$host" in
+ 	# reasons which cause compile warnings, so we disable those warnings.
+ 	OSSH_CHECK_CFLAG_COMPILE([-Wno-attributes])
+ 	;;
++*-*-msys*)
++	check_for_libcrypt_later=1
++	LIBS="$LIBS /usr/lib/textreadmode.o"
++	AC_DEFINE(HAVE_CYGWIN, 1, [Define if you are on Cygwin])
++	AC_DEFINE(USE_PIPES, 1, [Use PIPES instead of a socketpair()])
++	AC_DEFINE(DISABLE_SHADOW, 1,
++		[Define if you want to disable shadow passwords])
++	AC_DEFINE(NO_X11_UNIX_SOCKETS, 1,
++		[Define if X11 doesn't support AF_UNIX sockets on that system])
++	AC_DEFINE(NO_IPPORT_RESERVED_CONCEPT, 1,
++		[Define if the concept of ports only accessible to
++		superusers isn't known])
++	AC_DEFINE(DISABLE_FD_PASSING, 1,
++		[Define if your platform needs to skip post auth
++		file descriptor passing])
++	AC_DEFINE(SSH_IOBUFSZ, 65535, [Windows is sensitive to read buffer size])
++	;;
+ *-*-dgux*)
+ 	AC_DEFINE([IP_TOS_IS_BROKEN], [1],
+ 		[Define if your system choked on IP TOS setting])
+--- origsrc/openssh-6.5p1/defines.h	2014-01-17 13:12:38 +0000
++++ src/openssh-6.5p1/defines.h	2014-01-30 22:07:51 +0000
+@@ -787,6 +787,12 @@ struct winsize {
+ # undef HAVE_MMAP
+ #endif
+ 
++#ifdef __MSYS__
++#undef IOV_MAX
++#define IOV_MAX 1024
++#define SETGROUPS_NOOP
++#endif
++
+ #ifndef IOV_MAX
+ # if defined(_XOPEN_IOV_MAX)
+ #  define	IOV_MAX		_XOPEN_IOV_MAX
+--- origsrc/openssh-6.5p1/openbsd-compat/bsd-cygwin_util.c	2013-06-01 22:07:32 +0000
++++ src/openssh-6.5p1/openbsd-compat/bsd-cygwin_util.c	2014-01-30 22:07:51 +0000
+@@ -100,4 +100,12 @@ free_windows_environment(char **p)
+ 	free(p);
+ }
+ 
++#ifdef __MSYS__
++#include <ctype.h>
++# ifndef TM_YEAR_BASE
++#  define TM_YEAR_BASE      1900
++# endif
++#include "strptime.c"
++#endif
++
+ #endif /* HAVE_CYGWIN */
+--- origsrc/openssh-6.5p1/openbsd-compat/bsd-cygwin_util.h	2014-01-18 10:04:00 +0000
++++ src/openssh-6.5p1/openbsd-compat/bsd-cygwin_util.h	2014-01-30 22:07:51 +0000
+@@ -58,6 +58,10 @@ void free_windows_environment(char **);
+ #define open binary_open
+ #endif
+ 
++#ifdef __MSYS__
++char * strptime(const char *buf, const char *fmt, struct tm *tm);
++#endif
++
+ #endif /* HAVE_CYGWIN */
+ 
+ #endif /* _BSD_CYGWIN_UTIL_H */
+--- origsrc/openssh-6.5p1/openbsd-compat/bsd-misc.c	2013-11-03 05:30:47 +0000
++++ src/openssh-6.5p1/openbsd-compat/bsd-misc.c	2014-01-30 22:07:51 +0000
+@@ -25,6 +25,7 @@
+ # include <sys/time.h>
+ #endif
+ 
++#include <errno.h>
+ #include <string.h>
+ #include <signal.h>
+ #include <stdlib.h>
+@@ -135,6 +136,17 @@ int truncate(const char *path, off_t len
+ }
+ #endif /* HAVE_TRUNCATE */
+ 
++#if !defined(HAVE_SETGROUPS) && defined(SETGROUPS_NOOP)
++/*
++ * MSYS setgroups should be a noop.
++ */
++int
++setgroups(size_t size, const gid_t *list)
++{
++	return (0);
++}
++#endif
++
+ #if !defined(HAVE_NANOSLEEP) && !defined(HAVE_NSLEEP)
+ int nanosleep(const struct timespec *req, struct timespec *rem)
+ {
+--- origsrc/openssh-6.5p1/openbsd-compat/bsd-misc.h	2013-08-04 11:48:41 +0000
++++ src/openssh-6.5p1/openbsd-compat/bsd-misc.h	2014-01-30 22:07:51 +0000
+@@ -70,6 +70,10 @@ int utimes(char *, struct timeval *);
+ int truncate (const char *, off_t);
+ #endif /* HAVE_TRUNCATE */
+ 
++#if !defined(HAVE_SETGROUPS) && defined(SETGROUPS_NOOP)
++int setgroups(size_t, const gid_t *);
++#endif
++
+ #if !defined(HAVE_NANOSLEEP) && !defined(HAVE_NSLEEP)
+ #ifndef HAVE_STRUCT_TIMESPEC
+ struct timespec {
+--- origsrc/openssh-6.5p1/openbsd-compat/bsd-openpty.c	2006-08-24 09:52:30 +0000
++++ src/openssh-6.5p1/openbsd-compat/bsd-openpty.c	2014-01-30 22:07:51 +0000
+@@ -121,6 +121,8 @@ openpty(int *amaster, int *aslave, char
+ 		return (-1);
+ 	}
+ 
++/* the following hunk is ok on real cygwin, but dies on msys */
++#ifndef HAVE_CYGWIN
+ 	/*
+ 	 * Try to push the appropriate streams modules, as described 
+ 	 * in Solaris pts(7).
+@@ -130,6 +132,7 @@ openpty(int *amaster, int *aslave, char
+ # ifndef __hpux
+ 	ioctl(*aslave, I_PUSH, "ttcompat");
+ # endif /* __hpux */
++#endif /* HAVE_CYGWIN */
+ 
+ 	return (0);
+ 
+--- origsrc/openssh-6.5p1/openbsd-compat/bsd-statvfs.c	2014-01-17 07:10:59 +0000
++++ src/openssh-6.5p1/openbsd-compat/bsd-statvfs.c	2014-01-30 22:18:14 +0000
+@@ -17,6 +17,7 @@
+  */
+ 
+ #include "includes.h"
++#include <sys/vfs.h>
+ 
+ #if !defined(HAVE_STATVFS) || !defined(HAVE_FSTATVFS)
+ 
+@@ -27,6 +28,9 @@
+ 
+ #include <errno.h>
+ 
++/*  taken from http://www.openssh.com/cgi-bin/cvsweb/src/sys/sys/mount.h?rev=1.117;content-type=text%2Fx-cvsweb-markup */
++#define	MNAMELEN	90	/* length of buffer for returned name */
++
+ static void
+ copy_statfs_to_statvfs(struct statvfs *to, struct statfs *from)
+ {
+@@ -39,7 +43,7 @@ copy_statfs_to_statvfs(struct statvfs *t
+ 	to->f_ffree = from->f_ffree;
+ 	to->f_favail = from->f_ffree;	/* no exact equivalent */
+ 	to->f_fsid = 0;			/* XXX fix me */
+-	to->f_flag = from->f_flags;
++/*	to->f_flag = from->f_flags; */
+ 	to->f_namemax = MNAMELEN;
+ }
+ 
+--- origsrc/openssh-6.5p1/openbsd-compat/fmt_scaled.c	2008-05-19 22:57:08 +0000
++++ src/openssh-6.5p1/openbsd-compat/fmt_scaled.c	2014-01-30 22:21:15 +0000
+@@ -167,7 +167,7 @@ scan_scaled(char *scaled, long long *res
+ 			/* truncate fpart so it does't overflow.
+ 			 * then scale fractional part.
+ 			 */
+-			while (fpart >= LLONG_MAX / scale_fact) {
++			while (fpart >= LONG_LONG_MAX / scale_fact) {
+ 				fpart /= 10;
+ 				fract_digits--;
+ 			}
+--- origsrc/openssh-6.5p1/openbsd-compat/strtoll.c	2005-11-12 03:28:06 +0000
++++ src/openssh-6.5p1/openbsd-compat/strtoll.c	2014-01-30 22:22:39 +0000
+@@ -98,7 +98,7 @@ strtoll(const char *nptr, char **endptr,
+ 	 * Set any if any `digits' consumed; make it negative to indicate
+ 	 * overflow.
+ 	 */
+-	cutoff = neg ? LLONG_MIN : LLONG_MAX;
++	cutoff = neg ? LONG_LONG_MIN : LONG_LONG_MAX;
+ 	cutlim = cutoff % base;
+ 	cutoff /= base;
+ 	if (neg) {
+@@ -122,7 +122,7 @@ strtoll(const char *nptr, char **endptr,
+ 		if (neg) {
+ 			if (acc < cutoff || (acc == cutoff && c > cutlim)) {
+ 				any = -1;
+-				acc = LLONG_MIN;
++				acc = LONG_LONG_MIN;
+ 				errno = ERANGE;
+ 			} else {
+ 				any = 1;
+@@ -132,7 +132,7 @@ strtoll(const char *nptr, char **endptr,
+ 		} else {
+ 			if (acc > cutoff || (acc == cutoff && c > cutlim)) {
+ 				any = -1;
+-				acc = LLONG_MAX;
++				acc = LONG_LONG_MAX;
+ 				errno = ERANGE;
+ 			} else {
+ 				any = 1;
+--- origsrc/openssh-6.5p1/openbsd-compat/strtonum.c	2006-08-05 06:27:20 +0000
++++ src/openssh-6.5p1/openbsd-compat/strtonum.c	2014-01-30 22:21:46 +0000
+@@ -55,9 +55,9 @@ strtonum(const char *numstr, long long m
+ 		ll = strtoll(numstr, &ep, 10);
+ 		if (numstr == ep || *ep != '\0')
+ 			error = INVALID;
+-		else if ((ll == LLONG_MIN && errno == ERANGE) || ll < minval)
++		else if ((ll == LONG_LONG_MIN && errno == ERANGE) || ll < minval)
+ 			error = TOOSMALL;
+-		else if ((ll == LLONG_MAX && errno == ERANGE) || ll > maxval)
++		else if ((ll == LONG_LONG_MAX && errno == ERANGE) || ll > maxval)
+ 			error = TOOLARGE;
+ 	}
+ 	if (errstrp != NULL)
+--- origsrc/openssh-6.5p1/regress/agent-ptrace.sh	2014-01-28 18:26:26 +0000
++++ src/openssh-6.5p1/regress/agent-ptrace.sh	2014-01-30 22:07:51 +0000
+@@ -5,7 +5,7 @@ tid="disallow agent ptrace attach"
+ 
+ if have_prog uname ; then
+ 	case `uname` in
+-	AIX|CYGWIN*|OSF1)
++	AIX|CYGWIN*|MSYS*|OSF1)
+ 		echo "skipped (not supported on this platform)"
+ 		exit 0
+ 		;;
+--- origsrc/openssh-6.5p1/regress/sftp-cmds.sh	2013-07-25 02:11:20 +0000
++++ src/openssh-6.5p1/regress/sftp-cmds.sh	2014-01-30 22:07:51 +0000
+@@ -15,6 +15,23 @@ do
+ 	fi
+ done
+ 
++if have_prog uname
++then
++	case `uname` in
++	CYGWIN*)
++		os=cygwin
++		;;
++	MSYS*) # lie
++		os=msys
++		;;
++	*)
++		os=`uname`
++		;;
++	esac
++else
++	os="unknown"
++fi
++
+ # Path with embedded quote
+ QUOTECOPY=${COPY}".\"blah\""
+ QUOTECOPY_ARG=${COPY}'.\"blah\"'
+@@ -78,6 +95,7 @@ echo "get \"$DATA\" $COPY" | ${SFTP} -D
+ cmp $DATA ${COPY} || fail "corrupted copy after get"
+ 
+ if [ "$os" != "cygwin" ]; then
++if [ "$os" != "msys" ]; then
+ rm -f ${QUOTECOPY}
+ cp $DATA ${QUOTECOPY}
+ verbose "$tid: get filename with quotes"
+@@ -86,6 +104,7 @@ echo "get \"$QUOTECOPY_ARG\" ${COPY}" |
+ cmp ${COPY} ${QUOTECOPY} || fail "corrupted copy after get with quotes"
+ rm -f ${QUOTECOPY} ${COPY}
+ fi
++fi
+ 
+ rm -f "$SPACECOPY" ${COPY}
+ cp $DATA "$SPACECOPY"
+@@ -137,12 +156,14 @@ echo "put $DATA $COPY" | \
+ cmp $DATA ${COPY} || fail "corrupted copy after put"
+ 
+ if [ "$os" != "cygwin" ]; then
++if [ "$os" != "msys" ]; then
+ rm -f ${QUOTECOPY}
+ verbose "$tid: put filename with quotes"
+ echo "put $DATA \"$QUOTECOPY_ARG\"" | \
+ 	${SFTP} -D ${SFTPSERVER} >/dev/null 2>&1 || fail "put failed"
+ cmp $DATA ${QUOTECOPY} || fail "corrupted copy after put with quotes"
+ fi
++fi
+ 
+ rm -f "$SPACECOPY"
+ verbose "$tid: put filename with spaces"

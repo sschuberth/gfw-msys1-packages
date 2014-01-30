@@ -26,11 +26,6 @@ MGWCONF_ARGS="--without-rpath \
 CFLAGS="-O3 -fno-unit-at-a-time -s -mtune=i686"
 LDFLAGS="-Wl,--enable-auto-import"
 
-PATCH_URI="01-openssh-6.1p1-msys.patch
-           update-configure.patch
-           openssh-6.1p1-hpn13v14.patch
-           openssh-6.1p1-hpn13v14.msys.patch"
-
 create_textreadmode() {
   if [ ! -f /usr/lib/textreadmode.o ]; then
     cat > ${B}/textreadmode.c <<-"EOF"
@@ -72,47 +67,48 @@ remove_textreadmode() {
   fi
 }
 
-#OpenSSH has been configured with the following options:
-#                     User binaries: /usr/bin
-#                   System binaries: /usr/sbin
-#               Configuration files: /etc/ssh
-#                   Askpass program: /usr/lib/ssh-askpass
-#                      Manual pages: /usr/share/man/manX
-#                          PID file: /var/run
-#  Privilege separation chroot path: /var/empty
-#            sshd default user PATH: /usr/bin:/bin:/usr/sbin:/sbin
-#                    Manpage format: man
-#                       PAM support: no
-#                   OSF SIA support: no
-#                 KerberosV support: no
-#                   SELinux support: no
-#                 Smartcard support:
-#                     S/KEY support: no
-#              TCP Wrappers support: no
-#              MD5 password support: no
-#                   libedit support: no
-#  Solaris process contract support: no
-#           Solaris project support: no
-#       IP address in $DISPLAY hack: no
-#           Translate v4 in v6 hack: no
-#                  BSD Auth support: no
-#              Random number source: OpenSSL internal ONLY
-#             Privsep sandbox style: rlimit
-#
-#              Host: i686-pc-msys
-#          Compiler: gcc
-#    Compiler flags: -O3 -fno-unit-at-a-time -s -mtune=i686 -Wall -Wpointer-arith -Wuninitialized -Wsign-compare -Wformat
-#-security -fno-strict-aliasing -D_FORTIFY_SOURCE=2 -fno-builtin-memset
-#Preprocessor flags:  -D__CYGWIN__
-#      Linker flags: -lcrypt
-#         Libraries: -lcrypto -lz  -lminires /usr/lib/textreadmode.o -lcrypt
-#
-#WARNING: the operating system that you are using does not
-#appear to support getpeereid(), getpeerucred() or the
-#SO_PEERCRED getsockopt() option. These facilities are used to
-#enforce security checks to prevent unauthorised connections to
-#ssh-agent. Their absence increases the risk that a malicious
-#user can connect to your agent.
+# OpenSSH has been configured with the following options:
+#                      User binaries: /usr/bin
+#                    System binaries: /usr/sbin
+#                Configuration files: /etc/ssh
+#                    Askpass program: /usr/lib/ssh-askpass
+#                       Manual pages: /usr/share/man/manX
+#                           PID file: /var/run
+#   Privilege separation chroot path: /var/empty
+#             sshd default user PATH: /usr/bin:/bin:/usr/sbin:/sbin
+#                     Manpage format: man
+#                        PAM support: no
+#                    OSF SIA support: no
+#                  KerberosV support: no
+#                    SELinux support: no
+#                  Smartcard support:
+#                      S/KEY support: no
+#               TCP Wrappers support: no
+#               MD5 password support: no
+#                    libedit support: no
+#   Solaris process contract support: no
+#            Solaris project support: no
+#        IP address in $DISPLAY hack: no
+#            Translate v4 in v6 hack: no
+#                   BSD Auth support: no
+#               Random number source: OpenSSL internal ONLY
+#              Privsep sandbox style: rlimit
+# 
+#               Host: i686-pc-msys
+#           Compiler: gcc
+#     Compiler flags: -O3 -fno-unit-at-a-time -s -mtune=i686 -Wall -Wpointer-arith
+#  -Wuninitialized -Wsign-compare -Wformat-security -fno-strict-aliasing -D_FORTIF
+# Y_SOURCE=2 -ftrapv -fno-builtin-memset
+# Preprocessor flags:  -D__CYGWIN__
+#       Linker flags: -Wl,--enable-auto-import
+#          Libraries: -lcrypto -lz  -lminires /usr/lib/textreadmode.o -lcrypt
+# 
+# WARNING: the operating system that you are using does not
+# appear to support getpeereid(), getpeerucred() or the
+# SO_PEERCRED getsockopt() option. These facilities are used to
+# enforce security checks to prevent unauthorised connections to
+# ssh-agent. Their absence increases the risk that a malicious
+# user can connect to your agent.
 
 src_compile() {
   create_textreadmode

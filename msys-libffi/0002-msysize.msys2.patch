@@ -1,0 +1,20 @@
+--- libffi-3.0.12/acinclude.m4.orig	2013-02-11 19:24:18.000000000 +0000
++++ libffi-3.0.12/acinclude.m4	2013-07-19 23:15:24.243908800 +0000
+@@ -37,7 +37,7 @@
+    # Systems known to be in this category are Windows (all variants),
+    # VMS, and Darwin.
+    case "$host_os" in
+-     vms* | cygwin* | pe | mingw* | darwin* | ultrix* | hpux10* | hpux11.00)
++     vms* | cygwin* | msys* | pe | mingw* | darwin* | ultrix* | hpux10* | hpux11.00)
+ 	ac_cv_func_mmap_dev_zero=no ;;
+      *)
+ 	ac_cv_func_mmap_dev_zero=yes;;
+@@ -69,7 +69,7 @@
+    # above for use of /dev/zero.
+    # Systems known to be in this category are Windows, VMS, and SCO Unix.
+    case "$host_os" in
+-     vms* | cygwin* | pe | mingw* | sco* | udk* )
++     vms* | cygwin* | msys* | pe | mingw* | sco* | udk* )
+ 	ac_cv_func_mmap_anon=no ;;
+      *)
+ 	ac_cv_func_mmap_anon=yes;;

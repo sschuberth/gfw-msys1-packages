@@ -1,0 +1,10 @@
+--- libffi-3.0.12/src/closures.c.orig	2013-02-11 19:24:18.000000000 +0000
++++ libffi-3.0.12/src/closures.c	2013-07-19 23:21:15.173471200 +0000
+@@ -199,6 +199,7 @@
+ 
+ /* Cygwin is Linux-like, but not quite that Linux-like.  */
+ #define is_selinux_enabled() 0
++#define is_emutramp_enabled() 0
+ 
+ #endif /* !defined(X86_WIN32) && !defined(X86_WIN64) */
+ 

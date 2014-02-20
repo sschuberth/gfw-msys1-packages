@@ -1,0 +1,55 @@
+--- origsrc/libffi-3.0.13/src/x86/sysv.S	2013-03-16 11:19:39 +0000
++++ src/libffi-3.0.13/src/x86/sysv.S	2013-12-10 23:01:20 +0000
+@@ -37,7 +37,6 @@
+ 
+ 	.align 4
+ .globl ffi_call_SYSV
+-        .type    ffi_call_SYSV,@function
+ 
+ ffi_call_SYSV:
+ .LFB1:
+@@ -165,12 +164,10 @@ epilogue:
+         ret
+ .LFE1:
+ .ffi_call_SYSV_end:
+-        .size    ffi_call_SYSV,.ffi_call_SYSV_end-ffi_call_SYSV
+ 
+ 	.align	4
+ FFI_HIDDEN (ffi_closure_SYSV)
+ .globl ffi_closure_SYSV
+-	.type	ffi_closure_SYSV, @function
+ 
+ ffi_closure_SYSV:
+ .LFB2:
+@@ -252,7 +249,6 @@ ffi_closure_SYSV:
+ 	popl	%ebp
+ 	ret	$4
+ .LFE2:
+-	.size	ffi_closure_SYSV, .-ffi_closure_SYSV
+ 
+ #if !FFI_NO_RAW_API
+ 
+@@ -275,7 +271,6 @@ ffi_closure_SYSV:
+ 	.align	4
+ FFI_HIDDEN (ffi_closure_raw_SYSV)
+ .globl ffi_closure_raw_SYSV
+-	.type	ffi_closure_raw_SYSV, @function
+ 
+ ffi_closure_raw_SYSV:
+ .LFB3:
+@@ -336,7 +331,6 @@ ffi_closure_raw_SYSV:
+ 	movl	-20(%ebp), %edx
+ 	jmp	.Lrcls_epilogue
+ .LFE3:
+-	.size	ffi_closure_raw_SYSV, .-ffi_closure_raw_SYSV
+ #endif
+ 
+ #if defined __GNUC__
+@@ -361,7 +355,6 @@ ffi_closure_raw_SYSV:
+ # define FDE_ENCODE(X)		X
+ #endif
+ 
+-	.section	.eh_frame,EH_FRAME_FLAGS,@progbits
+ .Lframe1:
+ 	.long	.LECIE1-.LSCIE1	/* Length of Common Information Entry */
+ .LSCIE1:

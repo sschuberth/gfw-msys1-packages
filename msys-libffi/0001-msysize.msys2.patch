@@ -1,0 +1,20 @@
+--- libffi-3.0.12/configure.ac.orig	2013-02-11 19:24:24.000000000 +0000
++++ libffi-3.0.12/configure.ac	2013-07-19 23:00:09.181710600 +0000
+@@ -122,7 +122,7 @@
+   i?86-*-freebsd* | i?86-*-openbsd*)
+ 	TARGET=X86_FREEBSD; TARGETDIR=x86
+ 	;;
+-  i?86-win32* | i?86-*-cygwin* | i?86-*-mingw* | i?86-*-os2* | i?86-*-interix*)
++  i?86-win32* | i?86-*-cygwin* | i?86-*-msys* | i?86-*-mingw* | i?86-*-os2* | i?86-*-interix*)
+ 	TARGET=X86_WIN32; TARGETDIR=x86
+ 	# All mingw/cygwin/win32 builds require -no-undefined for sharedlib.
+ 	# We must also check with_cross_host to decide if this is a native
+@@ -150,7 +150,7 @@
+ 	TARGET=X86_DARWIN; TARGETDIR=x86
+ 	;;
+ 
+-  x86_64-*-cygwin* | x86_64-*-mingw*)
++  x86_64-*-cygwin* | x86_64-*-msys* | x86_64-*-mingw*)
+ 	TARGET=X86_WIN64; TARGETDIR=x86
+ 	# All mingw/cygwin/win32 builds require -no-undefined for sharedlib.
+ 	# We must also check with_cross_host to decide if this is a native

@@ -1,0 +1,15 @@
+--- origsrc/Python-2.7.5/Modules/mathmodule.c	2013-05-12 03:32:51 +0000
++++ src/Python-2.7.5/Modules/mathmodule.c	2013-12-10 22:16:07 +0000
+@@ -70,6 +70,12 @@ extern double copysign(double, double);
+ static const double pi = 3.141592653589793238462643383279502884197;
+ static const double sqrtpi = 1.772453850905516027298167483341145182798;
+ 
++
++/* quick and dirty round function */
++double round(double x) {
++      return (x >= 0.0) ? floor(x + 0.5) : ceil(x - 0.5);
++}
++
+ static double
+ sinpi(double x)
+ {

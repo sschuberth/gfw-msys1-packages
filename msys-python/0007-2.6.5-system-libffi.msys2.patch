@@ -1,0 +1,14 @@
+--- Python-2.7.5/setup.py.orig	2013-09-29 14:06:29.981432200 +0000
++++ Python-2.7.5/setup.py	2013-09-29 14:08:05.237028100 +0000
+@@ -2041,6 +2041,11 @@
+         if not '--with-system-ffi' in sysconfig.get_config_var("CONFIG_ARGS"):
+             return
+ 
++        if sys.platform == 'cygwin':
++            # provided by GCC
++            ext.libraries.append('ffi')
++            self.use_system_libffi = True
++
+         if host_platform == 'darwin':
+             # OS X 10.5 comes with libffi.dylib; the include files are
+             # in /usr/include/ffi

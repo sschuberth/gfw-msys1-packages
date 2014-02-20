@@ -1,0 +1,12 @@
+diff -Naur Python-2.7.3-cygwin/Lib/ctypes/test/test_loading.py Python-2.7.3/Lib/ctypes/test/test_loading.py
+--- Python-2.7.3-cygwin/Lib/ctypes/test/test_loading.py	2012-04-09 23:07:29.000000000 +0000
++++ Python-2.7.3/Lib/ctypes/test/test_loading.py	2013-03-31 17:59:54.151367200 +0000
+@@ -11,6 +11,6 @@
+     libc_name = "coredll"
+-elif sys.platform == "cygwin":
+-    libc_name = "cygwin1.dll"
++elif sys.platform == "cygwin":
++    libc_name = "msys-2.0.dll"
+ else:
+     libc_name = find_library("c")
+ 

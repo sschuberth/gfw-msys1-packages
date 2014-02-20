@@ -1,0 +1,11 @@
+--- Python-2.7.5/Include/node.h.orig	2013-05-12 03:32:41.000000000 +0000
++++ Python-2.7.5/Include/node.h	2013-09-29 15:09:06.327427600 +0000
+@@ -21,7 +21,7 @@
+                                       char *str, int lineno, int col_offset);
+ PyAPI_FUNC(void) PyNode_Free(node *n);
+ #ifndef Py_LIMITED_API
+-Py_ssize_t _PyNode_SizeOf(node *n);
++PyAPI_FUNC(Py_ssize_t) _PyNode_SizeOf(node *n);
+ #endif
+ 
+ /* Node access functions */

@@ -1,0 +1,13 @@
+--- Python-2.7.3/Makefile.pre.in.orig	2012-04-09 23:07:33.000000000 +0000
++++ Python-2.7.3/Makefile.pre.in	2013-07-20 00:37:42.284460300 +0000
+@@ -795,9 +795,9 @@
+ 	then rm -f $(DESTDIR)$(BINDIR)/$(PYTHON); \
+ 	else true; \
+ 	fi
+-	(cd $(DESTDIR)$(BINDIR); $(LN) -s python2$(EXE) $(PYTHON))
+ 	-rm -f $(DESTDIR)$(BINDIR)/python2$(EXE)
+ 	(cd $(DESTDIR)$(BINDIR); $(LN) -s python$(VERSION)$(EXE) python2$(EXE))
++	(cd $(DESTDIR)$(BINDIR); $(LN) -s python2$(EXE) $(PYTHON))
+ 	-rm -f $(DESTDIR)$(BINDIR)/python2-config
+ 	(cd $(DESTDIR)$(BINDIR); $(LN) -s python$(VERSION)-config python2-config)
+ 	-rm -f $(DESTDIR)$(BINDIR)/python-config

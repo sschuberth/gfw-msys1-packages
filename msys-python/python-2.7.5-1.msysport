@@ -1,0 +1,68 @@
+DESCRIPTION="Python is a widely used general-purpose, high-level programming language."
+HOMEPAGE="http://www.python.org"
+SRC_URI="http://www.python.org/ftp/python/${PV}/Python-${PV}.tar.bz2
+         http://www.python.org/ftp/python/${PV}/Python-${PV}.tar.bz2.asc"
+
+PKG_NAMES="${PN} ${PN} ${PN}"
+
+PKG_COMPTYPES="bin doc lic"
+
+PKG_CONTENTS[0]="bin lib include"
+PKG_CONTENTS[1]="share/doc share/man
+                 --exclude share/doc/${PN}/${PV}/LICENSE"
+PKG_CONTENTS[2]="share/doc/${PN}/${PV}/LICENSE"
+
+DIFF_EXCLUDES="plat-cygwin"
+
+PATCH_URI="0001-2.5.2-ctypes-util-find_library.msys2.patch
+           0002-2.5.2-tkinter-x11.msys2.patch
+           0003-2.6.2-ssl-threads.msys2.patch
+           0004-2.6.5-export-PySignal_SetWakeupFd.msys2.patch
+           0005-2.6.5-FD_SETSIZE.msys2.patch
+           0006-2.6.5-ncurses-abi6.msys2.patch
+           0007-2.6.5-system-libffi.msys2.patch
+           0008-2.7.3-dbm.msys2.patch
+           0009-2.7.3-dylib.msys2.patch
+           0010-2.7.3-getpath-exe-extension.msys2.patch
+           0013-msysize-configure.msys2.patch
+           0014-pretend-to-be-cygwin.msys2.patch
+           0015-msysize-ctypes-loading.msys2.patch
+           0016-msysize-crypt-loading.msys2.patch
+           0017-msysize-tests.msys2.patch
+           0018-symlink-creation-order.msys2.patch
+           0019-make-_PyNode_SizeOf-public.msys2.patch
+           0023-increase-max-db-ver.msys2.patch
+           add-round-function.patch"
+
+src_compile() {
+  cd ${S}
+  mgwautoreconf
+
+  # As our GCC does not define HUGE_VAL properly, see http://gcc.gnu.org/bugzilla/show_bug.cgi?id=19933,
+  # we use "#define HUGE_VAL infinity()". infinity() is only available for undefined __STRICT_ANSI__.
+  cd ${B}
+  mgwconf \
+  --enable-shared \
+  --disable-ipv6 \
+  --with-dbmliborder=gdbm \
+  --with-libc= \
+  --with-libm= \
+  --with-system-ffi \
+  --with-system-expat \
+  ac_cv_func_bind_textdomain_codeset=yes \
+  CFLAGS="$CFLAGS -U__STRICT_ANSI__ -DHUGE_VAL=\"infinity()\""
+
+  mgwmake
+}
+
+src_test() {
+  cd ${B}
+
+  # Disabled as it hangs at "test_imaplib".
+  #mgwmake testall
+}
+
+src_install() {
+  cd ${B}
+  mgwinstall 
+}

@@ -1,0 +1,14 @@
+diff -Naur Python-2.7.3-cygwin/Lib/ctypes/util.py Python-2.7.3/Lib/ctypes/util.py
+--- Python-2.7.3-cygwin/Lib/ctypes/util.py	2013-03-31 17:34:07.669921900 +0000
++++ Python-2.7.3/Lib/ctypes/util.py	2013-03-31 18:01:27.604492200 +0000
+@@ -255,7 +255,7 @@
+         elif sys.platform == "cygwin":
+-            print cdll.LoadLibrary("cygbz2-1.dll") 
+-            print find_library("crypt")
+-            print cdll.LoadLibrary("cygcrypt-0.dll") 
++            print cdll.LoadLibrary("msys-bz2-1.dll") 
++            print find_library("crypt")
++            print cdll.LoadLibrary("msys-crypt-0.dll")
+         else:
+             print cdll.LoadLibrary("libm.so")
+             print cdll.LoadLibrary("libcrypt.so")

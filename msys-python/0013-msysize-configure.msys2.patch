@@ -1,0 +1,92 @@
+--- Python-2.7.3/configure.ac.orig	2012-04-09 23:07:36.000000000 +0000
++++ Python-2.7.3/configure.ac	2013-07-19 23:35:55.259227900 +0000
+@@ -294,7 +294,7 @@
+ 
+ 	case $MACHDEP in
+ 	linux*) MACHDEP="linux2";;
+-	cygwin*) MACHDEP="cygwin";;
++	cygwin*|msys*) MACHDEP="cygwin";;
+ 	darwin*) MACHDEP="darwin";;
+ 	atheos*) MACHDEP="atheos";;
+         irix646) MACHDEP="irix6";;
+@@ -718,7 +718,7 @@
+ if test -z "$enable_shared"
+ then 
+   case $ac_sys_system in
+-  CYGWIN* | atheos*)
++  CYGWIN* | MSYS* | atheos*)
+     enable_shared="yes";;
+   *)
+     enable_shared="no";;
+@@ -769,7 +769,7 @@
+     BeOS*)
+           LDLIBRARY='libpython$(VERSION).so'
+           ;;
+-    CYGWIN*)
++    CYGWIN* | MSYS*)
+           LDLIBRARY='libpython$(VERSION).dll.a'
+           DLLLIBRARY='libpython$(VERSION).dll'
+           ;;
+@@ -825,7 +825,7 @@
+   esac
+ else # shared is disabled
+   case $ac_sys_system in
+-    CYGWIN*)
++    CYGWIN* | MSYS*)
+           BLDLIBRARY='$(LIBRARY)'
+           LDLIBRARY='libpython$(VERSION).dll.a'
+           ;;
+@@ -884,7 +884,7 @@
+ if test -z "$LN" ; then
+ 	case $ac_sys_system in
+ 		BeOS*) LN="ln -s";;
+-		CYGWIN*) LN="ln -s";;
++		CYGWIN*|MSYS*) LN="ln -s";;
+ 		atheos*) LN="ln -s";;
+ 		*) LN=ln;;
+ 	esac
+@@ -1759,7 +1759,7 @@
+ 	  		*)    SO=.sl;;
+ 		esac
+ 		;;
+-	CYGWIN*)   SO=.dll;;
++	CYGWIN*|MSYS*)   SO=.dll;;
+ 	*)	   SO=.so;;
+ 	esac
+ else
+@@ -1910,7 +1910,7 @@
+ 	SCO_SV*)
+ 		LDSHARED='$(CC) -Wl,-G,-Bexport'
+ 		LDCXXSHARED='$(CXX) -Wl,-G,-Bexport';;
+-	CYGWIN*)
++	CYGWIN*|MSYS*)
+ 		LDSHARED="gcc -shared -Wl,--enable-auto-image-base"
+ 		LDCXXSHARED="g++ -shared -Wl,--enable-auto-image-base";;
+ 	atheos*)
+@@ -2002,7 +2002,7 @@
+ 			LINKFORSHARED="-Xlinker --export-dynamic"
+ 		    fi;;
+ 		  esac;;
+-	CYGWIN*)
++	CYGWIN*|MSYS*)
+ 		if test $enable_shared = "no"
+ 		then
+ 			LINKFORSHARED='-Wl,--out-implib=$(LDLIBRARY)'
+@@ -2024,7 +2024,7 @@
+ if test ! "$LIBRARY" = "$LDLIBRARY"
+ then
+ 	case $ac_sys_system in
+-	CYGWIN*)
++	CYGWIN*|MSYS*)
+ 		# Cygwin needs CCSHARED when building extension DLLs
+ 		# but not when building the interpreter DLL.
+ 		CFLAGSFORSHARED='';;
+@@ -2402,7 +2402,7 @@
+       fi
+       AC_CHECK_FUNCS(pthread_sigmask,
+         [case $ac_sys_system in
+-        CYGWIN*)
++        CYGWIN*|MSYS*)
+           AC_DEFINE(HAVE_BROKEN_PTHREAD_SIGMASK, 1,
+             [Define if pthread_sigmask() does not work on your system.])
+             ;;

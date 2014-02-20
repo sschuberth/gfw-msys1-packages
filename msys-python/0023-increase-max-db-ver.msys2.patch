@@ -1,0 +1,13 @@
+--- Python-2.7.5/setup.py.orig	2013-09-29 18:14:04.109667000 +0000
++++ Python-2.7.5/setup.py	2013-09-29 18:36:27.223720800 +0000
+@@ -879,8 +879,8 @@
+         # a release.  Most open source OSes come with one or more
+         # versions of BerkeleyDB already installed.
+ 
+-        max_db_ver = (5, 3)
+-        min_db_ver = (4, 3)
++        max_db_ver = (5, 8)
++        min_db_ver = (4, 8)
+         db_setup_debug = False   # verbose debug prints from this script?
+ 
+         def allow_db_ver(db_ver):

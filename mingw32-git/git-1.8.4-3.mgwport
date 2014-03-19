@@ -18,9 +18,13 @@ PKG_CONTENTS[0]="bin
                  --exclude libexec/git-core/git-subtree
                  share
                  --exclude share/doc
+                 --exclude share/git-core/git-completion.bash
+                 --exclude share/git-core/git-prompt.sh
                  usr"
 PKG_CONTENTS[1]="libexec/git-core/git-contacts
-                 libexec/git-core/git-subtree"
+                 libexec/git-core/git-subtree
+                 share/git-core/git-completion.bash
+                 share/git-core/git-prompt.sh"
 PKG_CONTENTS[2]="share/doc
                  --exclude share/doc/${PN}/${PV}/COPYING"
 PKG_CONTENTS[3]="share/doc/${PN}/${PV}/COPYING"
@@ -64,4 +68,8 @@ src_install() {
 
   exeinto /mingw/libexec/git-core
   doexe contacts/git-contacts
+
+  exeinto /mingw/share/git-core
+  doexe completion/git-completion.bash
+  doexe completion/git-prompt.sh
 }

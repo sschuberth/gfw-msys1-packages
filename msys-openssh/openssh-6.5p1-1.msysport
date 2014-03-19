@@ -5,8 +5,6 @@ SRC_URI="http://ftp.spline.de/pub/OpenBSD/OpenSSH/portable/${PN}-${PV}.tar.gz"
 
 PKG_NAMES="${PN} ${PN} ${PN} ${PN}"
 
-prefix=/usr
-
 PKG_COMPTYPES="bin ext doc lic"
 
 PKG_CONTENTS[0]="bin
@@ -136,13 +134,15 @@ src_install() {
   cd ${B}
   mgwinstall
 
+  prefix=/usr
+
   # Remove server related files.
-  rm -f ${D}${prefix}/sbin/sshd.exe
-  rm -f ${D}${prefix}/lib/sftp-server.exe
   rm -f ${D}/etc/ssh/sshd_config
-  rm -f ${D}${prefix}/share/man/man8/sftp-server.8
-  rm -f ${D}${prefix}/share/man/man8/sshd.8
   rm -f ${D}${prefix}/share/man/man5/sshd_config.5
+  rm -f ${D}${prefix}/sbin/sshd.exe
+  rm -f ${D}${prefix}/share/man/man8/sshd.8
+  rm -f ${D}${prefix}/lib/sftp-server.exe
+  rm -f ${D}${prefix}/share/man/man8/sftp-server.8
 
   mv -f ${D}/etc ${D}${prefix}/
 

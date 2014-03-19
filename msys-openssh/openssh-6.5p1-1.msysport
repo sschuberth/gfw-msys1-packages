@@ -136,8 +136,7 @@ src_install() {
   cd ${B}
   mgwinstall
 
-  # Remove sshd server related files.
-  rm -f ${D}${prefix}/share/info/dir
+  # Remove server related files.
   rm -f ${D}${prefix}/sbin/sshd.exe
   rm -f ${D}${prefix}/lib/sftp-server.exe
   rm -f ${D}/etc/ssh/sshd_config

@@ -1,4 +1,4 @@
-## Introduction
+# Introduction
 
 This is [mingwGitDevEnv-packages](https://github.com/sschuberth/mingwGitDevEnv-packages), the project providing the mingw-get packages for [mingwGitDevEnv](https://github.com/sschuberth/mingwGitDevEnv).
 
@@ -14,6 +14,8 @@ For convenience, the _*.xml.lzma_ files are supposed to be (de-)compressed on-th
     	clean = lzma -z
 
 If you let the mingwGitDevEnv installer clone the packages repository this is already done for you.
+
+# Getting involved
 
 ## Creating mingw-get packages
 
@@ -32,3 +34,8 @@ If you want to create a new package for use with mingw-get the following steps a
 * Upload the compressed catalogue and updated master catalogue files to one of the web server locations listed as _repository uri_ at the end of the [update-mingw-get.sh](https://github.com/sschuberth/mingwGitDevEnv/blob/master/update-mingw-get.sh) script. _(Currently only I have access to this location, so please contact me instead.)_
 * Upload the package archives to the web server location that is listed as _download-host uri_ in its catalogue file. _(As it probably makes sense to host all mingwGitDevEnv related packages in one place, please contact me instead.)_
 * Send a [pull request](https://github.com/sschuberth/mingwGitDevEnv-packages/pulls).
+
+## Getting in contact
+
+We now have a [mailing list](http://groups.google.com/group/mingwGitDevEnv) for developers.
+

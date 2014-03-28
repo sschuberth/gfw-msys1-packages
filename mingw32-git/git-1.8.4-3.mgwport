@@ -46,8 +46,15 @@ src_compile() {
 }
 
 src_test() {
+  procs=$($SYSTEMROOT/System32/wbem/wmic.exe cpu get NumberOfLogicalProcessors | grep -oP "\d+")
+  if [ -n "$procs" ]; then
+    jobs=$(expr $procs + 1)
+  else
+    jobs=5
+  fi
+
   cd ${B}/t
-  prove -v t[0-9]*.sh
+  prove -j $jobs -v t[0-9]*.sh
 }
 
 src_install() {

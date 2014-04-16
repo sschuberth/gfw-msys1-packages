@@ -1,0 +1,29 @@
+DESCRIPTION="Tracks dependencies for Windows EXE and DLL PE-files (Portable Executable), resembles ldd from libc"
+HOMEPAGE="https://github.com/LRN/ntldd"
+
+SRC_URI="https://github.com/LRN/${PN}/archive/${PV}.tar.gz"
+
+# The "src" package is created by default.
+PKG_COMPTYPES="bin doc lic"
+PKG_CONTENTS[0]="bin/*.exe"
+PKG_CONTENTS[1]="share/doc/${PN}/${PV}/README"
+PKG_CONTENTS[2]="share/doc/${PN}/${PV}/gpl-3.0.txt"
+
+src_compile() {
+  # Mirror the source into the build directory.
+  lndirs
+
+  cd ${B}
+  ./makeldd.sh
+}
+
+src_install() {
+  cd ${B}
+
+  exeinto /mingw/bin
+  doexe ntldd.exe
+
+  # Some mgwport magic is already installing the README correctly.
+
+  dodoc gpl-3.0.txt
+}

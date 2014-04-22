@@ -7,7 +7,10 @@ if [ -z "$paths" ]; then
 fi
 
 for path in $(find $paths -maxdepth 2 -name "*.tar.lzma" -not -name "*-src.*"); do
-    case $(basename $path) in
+    package=$(basename $path)
+    echo "Installing $package..."
+
+    case $package in
     *mingw32*)
         tar vxf $path -C /mingw/
         ;;

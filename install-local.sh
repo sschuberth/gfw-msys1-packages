@@ -6,7 +6,7 @@ if [ -z "$paths" ]; then
     paths=.
 fi
 
-for path in $(find $paths -maxdepth 2 -name "*.tar.lzma" -not -name "*-src.*"); do
+for path in $(find $paths -maxdepth 2 -iname "*.tar.lzma" -not -iname "*-src.*"); do
     package=$(basename $path)
     echo "Installing $package..."
 

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 paths=$@
 
@@ -7,7 +7,7 @@ if [ -z "$paths" ]; then
 fi
 
 for path in $(find $paths -maxdepth 2 -iname "*.tar.lzma" -not -iname "*-src.*"); do
-    package=$(basename $path)
+    package=${path##*/}
     echo "Installing $package..."
 
     case $package in

@@ -1,0 +1,46 @@
+DESCRIPTION="DocBook is a schema (available in several languages including RELAX NG, SGML and XML DTDs, and W3C XML Schema) maintained by the DocBook Technical Committee of OASIS. It is particularly well suited to books and papers about computer hardware and software (though it is by no means limited to these applications)."
+
+xsl_version=1.78.1
+
+HOMEPAGE="http://docbook.org"
+SRC_URI="http://docbook.org/xml/${PV}/${PN}-xml-${PV}.zip
+         http://downloads.sourceforge.net/docbook/docbook-xsl-${xsl_version}.tar.bz2"
+SRC_DIR="."
+
+PKG_COMPTYPES="bin doc"
+
+PKG_CONTENTS[0]="share --exclude=share/doc"
+PKG_CONTENTS[1]="share/doc"
+
+src_compile() {
+  # Mirror the source into the build directory.
+  lndirs
+}
+
+src_test() {
+  cd ${B}/docbook-xsl-${xsl_version}
+  mgwtest
+}
+
+src_install() {
+  mkdir -p ${D}/usr/share/xml/docbook/xsl-stylesheets-${xsl_version}
+  cd ${S}/docbook-xsl-${xsl_version} && \
+  cp -r VERSION VERSION.xsl common eclipse epub extensions fo highlighting html \
+        htmlhelp images javahelp lib manpages params profiling \
+        roundtrip slides template tests tools webhelp website \
+        xhtml xhtml-1_1 \
+        ${D}/usr/share/xml/docbook/xsl-stylesheets-${xsl_version}
+
+  insinto /usr/share/xml/docbook/schema/dtd/${PV}
+  doins ${S}/*.dtd
+  doins ${S}/*.mod
+  doins ${S}/catalog.xml
+  insinto /usr/share/xml/docbook/schema/dtd/${PV}/ent
+  doins ${S}/ent/*
+
+  insinto /usr/share/xml/docbook
+  doins  ${S}/../../docbook-post-install.sh
+
+  dodoc ${S}/ChangeLog
+  dodoc ${S}/README
+}

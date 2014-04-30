@@ -1,0 +1,11 @@
+--- libxslt-1.1.28/configure.in.orig	2013-03-27 15:51:27 +0400
++++ libxslt-1.1.28/configure.in	2013-03-27 16:06:05 +0400
+@@ -622,7 +622,7 @@
+ WIN32_EXTRA_LIBADD=
+ WIN32_EXTRA_LDFLAGS=
+ case "$host" in
+- *-*-cygwin*)
++ *-*-cygwin* | *-*-msys*)
+  WIN32_EXTRA_LDFLAGS="-no-undefined"
+  ;;
+  *-*-mingw*)

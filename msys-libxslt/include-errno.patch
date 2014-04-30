@@ -1,0 +1,11 @@
+--- origsrc/libxslt-1.1.28/libxslt/security.c	2014-04-30 21:10:53 +0000
++++ src/libxslt-1.1.28/libxslt/security.c	2014-04-30 21:18:27 +0000
+@@ -60,7 +60,7 @@
+ #include "xsltutils.h"
+ #include "extensions.h"
+ #include "security.h"
+-
++#include "errno.h"
+ 
+ struct _xsltSecurityPrefs {
+     xsltSecurityCheck readFile;

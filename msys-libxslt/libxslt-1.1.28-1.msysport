@@ -1,0 +1,38 @@
+DESCRIPTION="Libxslt is the XSLT C library developed for the GNOME project. XSLT itself is a an XML language to define transformation for XML. Libxslt is based on libxml2 the XML C library developed for the GNOME project. It also implements most of the EXSLT set of processor-portable extensions functions and some of Saxon's evaluate and expressions extensions."
+
+HOMEPAGE="http://xmlsoft.org/XSLT/index.html"
+SRC_URI="ftp://xmlsoft.org/${PN}/${PN}-${PV}.tar.gz"
+
+PKG_NAMES="${PN} ${PN} ${PN} ${PN} ${PN} ${PN}"
+
+xsltabi=1
+exsltabi=0
+PKG_COMPTYPES="bin dev doc lic xslt-dll-${xsltabi} exslt-dll-${exsltabi}"
+
+PKG_CONTENTS[0]="bin
+                 --exclude *dll"
+PKG_CONTENTS[1]="include lib share/aclocal"
+PKG_CONTENTS[2]="share/doc share/man
+                 --exclude share/doc/${PN}/${PV}/COPYING"
+PKG_CONTENTS[3]="share/doc/${PN}/${PV}/COPYING"
+PKG_CONTENTS[4]="bin/*-xslt-*.dll"
+PKG_CONTENTS[5]="bin/*-exslt-*.dll"
+
+PATCH_URI="0001-no-undefined-on.msys2.patch
+           0003-fix-concurrent-directory-creation.all.patch
+           0004-add-missing-include-for-python.all.patch
+           0005-fix-freelocales-export.all.patch
+           msys-config-update.patch
+           include-errno.patch"
+
+src_compile() {
+  cd ${S}
+  mgwautoreconf
+
+  # Mirror the source into the build directory.
+  lndirs
+
+  cd ${B}
+  mgwconf
+  mgwmake
+}

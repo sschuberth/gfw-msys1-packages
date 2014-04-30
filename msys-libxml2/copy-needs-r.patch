@@ -1,0 +1,13 @@
+--- origsrc/libxml2-2.9.1/Makefile.am	2013-02-27 05:08:48 +0000
++++ src/libxml2-2.9.1/Makefile.am	2014-02-20 12:03:20 +0000
+@@ -203,8 +203,8 @@ runxmlconf_LDADD= $(LDADDS)
+ #testOOM_LDADD= $(LDADDS)
+ 
+ runtests:
+-	[ -d test   ] || $(LN_S) $(srcdir)/test   .
+-	[ -d result ] || $(LN_S) $(srcdir)/result .
++	[ -d test   ] || cp -pr $(srcdir)/test   .
++	[ -d result ] || cp -pr $(srcdir)/result .
+ 	$(CHECKER) ./runtest$(EXEEXT) && $(CHECKER) ./testrecurse$(EXEEXT) &&$(CHECKER) ./testapi$(EXEEXT) && $(CHECKER) ./testchar$(EXEEXT)&& $(CHECKER) ./testdict$(EXEEXT) && $(CHECKER) ./runxmlconf$(EXEEXT)
+ 	@(if [ "$(PYTHON_SUBDIR)" != "" ] ; then cd python ; \
+ 	    $(MAKE) tests ; fi)

@@ -1,0 +1,11 @@
+--- origsrc/libxml2-2.9.1/timsort.h	2013-02-27 05:08:51 +0000
++++ src/libxml2-2.9.1/timsort.h	2014-02-20 11:01:53 +0000
+@@ -30,6 +30,8 @@ typedef unsigned __int64 uint64_t;
+ #endif
+ #endif
+ 
++typedef u_int64_t uint64_t;
++
+ #ifndef MK_UINT64
+ #if defined(WIN32) && defined(_MSC_VER) && _MSC_VER < 1300
+ #define MK_UINT64(x) ((uint64_t)(x))

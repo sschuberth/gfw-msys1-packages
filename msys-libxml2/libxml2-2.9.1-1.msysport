@@ -1,0 +1,33 @@
+DESCRIPTION="Libxml2 is the XML C parser and toolkit developed for the Gnome project (but usable outside of the Gnome platform), it is free software available under the MIT License. XML itself is a metalanguage to design markup languages, i.e. text language where semantic and structure are added to the content using extra \"markup\" information enclosed between angle brackets. HTML is the most well-known markup language. Though the library is written in C a variety of language bindings make it available in other environments."
+
+HOMEPAGE="http://xmlsoft.org/XSLT/index.html"
+SRC_URI="ftp://xmlsoft.org/${PN}/${PN}-${PV}.tar.gz"
+
+abi=2
+PKG_COMPTYPES="bin dev doc lic dll-${abi}"
+
+PKG_CONTENTS[0]="bin --exclude *.dll"
+PKG_CONTENTS[1]="include lib share/aclocal"
+PKG_CONTENTS[2]="share/doc share/gtk-doc share/man
+                 --exclude share/doc/${PN}/${PV}/COPYING"
+PKG_CONTENTS[3]="share/doc/${PN}/${PV}/COPYING"
+PKG_CONTENTS[4]="bin/*.dll"
+
+PATCH_URI="define_uint64_t.patch
+           no-undefined.patch
+           copy-needs-r.patch"
+
+DIFF_EXCLUDES="xmlversion.h
+               setup.py"
+
+src_compile() {
+  cd ${S}
+  mgwautoreconf
+
+  # Mirror the source into the build directory.
+  lndirs
+
+  cd ${B}
+  mgwconf
+  mgwmake
+}

@@ -1,0 +1,11 @@
+--- origsrc/libxml2-2.9.1/configure.in	2013-04-19 07:25:20 +0000
++++ src/libxml2-2.9.1/configure.in	2014-02-20 11:28:28 +0000
+@@ -1503,7 +1503,7 @@ case "$host" in
+    WIN32_EXTRA_PYTHON_LIBADD="-L${pythondir}/../../libs -lpython$(echo ${PYTHON_VERSION} | tr -d .)"
+  fi
+  ;;
+- *-*-cygwin*)
++ *-*-msys*)
+  CYGWIN_EXTRA_LDFLAGS="-no-undefined"
+  if test "${PYTHON}" != ""
+  then

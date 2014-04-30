@@ -1,0 +1,24 @@
+DESCRIPTION="xmlto is a shell-script tool for converting XML files to various formats."
+
+HOMEPAGE="https://fedorahosted.org/xmlto/"
+SRC_URI="https://fedorahosted.org/releases/x/m/${PN}/${PN}-${PV}.tar.gz
+         https://fedorahosted.org/releases/x/m/${PN}/${PN}-${PV}.tar.gz.sig"
+
+PKG_COMPTYPES="bin doc lic"
+
+PKG_CONTENTS[0]="bin share/${PN}"
+PKG_CONTENTS[1]="share/doc share/man
+                 --exclude share/doc/${PN}/${PV}/COPYING"
+PKG_CONTENTS[2]="share/doc/${PN}/${PV}/COPYING"
+
+src_compile() {
+  cd ${S}
+  mgwautoreconf
+
+  # Mirror the source into the build directory.
+  lndirs
+
+  cd ${B}
+  mgwconf
+  mgwmake
+}

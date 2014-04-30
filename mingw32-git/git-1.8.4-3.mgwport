@@ -1,15 +1,8 @@
 DESCRIPTION="Git distributed version control system"
 HOMEPAGE="http://git-scm.com/"
 
-# The commit in the git-htmldocs repository that matches this version of git.
-HTMLDOCS_COMMIT=b6595471f5299e8b13181e09072b486dd0ad6261
-
-SRC_URI="https://github.com/sschuberth/${PN}/archive/v${PV}-mingw-${PR}.tar.gz
-         https://github.com/gitster/git-htmldocs/archive/${HTMLDOCS_COMMIT}.tar.gz"
+SRC_URI="https://github.com/sschuberth/${PN}/archive/v${PV}-mingw-${PR}.tar.gz"
 SRC_DIR="${P}-mingw-${PR}"
-
-HTMLDOCS_PATH=${srcdir}/git-htmldocs-${HTMLDOCS_COMMIT}
-HTMLDOCS="${HTMLDOCS_PATH}/*.html"
 
 PKG_COMPTYPES="bin ext doc lic"
 PKG_CONTENTS[0]="bin
@@ -42,7 +35,7 @@ src_compile() {
   # value in GIT-VERSION-GEN.
   echo "${PV}-mingw-${PR}" > version
 
-  mgwmake
+  mgwmake all doc
 }
 
 src_test() {
@@ -60,12 +53,7 @@ src_test() {
 src_install() {
   cd ${B}
   USE_DESTDIR=1
-  _MGWPORT_RESTRICT_native_prefix_=1 mgwinstall DESTDIR=${D}/mingw
-
-  docinto html/howto
-  dodoc ${HTMLDOCS_PATH}/howto/*.html
-  docinto html/technical
-  dodoc ${HTMLDOCS_PATH}/technical/*.html
+  _MGWPORT_RESTRICT_native_prefix_=1 mgwinstall DESTDIR=${D}/mingw all install-html
 
   # Install contributed stuff to be included into the "ext" package.
   cd contrib

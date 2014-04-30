@@ -1,0 +1,27 @@
+DESCRIPTION="Text document format for short documents, articles, books and UNIX man pages."
+
+HOMEPAGE="http://www.methods.co.nz/asciidoc/"
+SRC_URI="http://downloads.sourceforge.net/${PN}/${PN}-${PV}.tar.gz"
+
+PKG_NAMES="${PN} ${PN} ${PN}"
+
+PKG_COMPTYPES="bin doc lic"
+
+PKG_CONTENTS[0]="bin etc"
+PKG_CONTENTS[1]="share/doc share/man
+                 --exclude share/doc/${PN}/${PV}/COPYING"
+PKG_CONTENTS[2]="share/doc/${PN}/${PV}/COPYING"
+
+PATCH_URI="0001-W32-confdir.msys2.patch"
+
+src_compile() {
+  cd ${S}
+  mgwautoreconf
+
+  # Mirror the source into the build directory.
+  lndirs
+
+  cd ${B}
+  mgwconf
+  mgwmake
+}

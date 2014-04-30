@@ -1,0 +1,31 @@
+DESCRIPTION="Getopt(1) is a program to help shell scripts parse command-line parameters."
+
+HOMEPAGE="http://software.frodo.looijaard.name/getopt/"
+SRC_URI="http://software.frodo.looijaard.name/${PN}/files/${PN}-${PV}.tar.gz"
+
+PKG_COMPTYPES="bin doc lic"
+
+PKG_CONTENTS[0]="bin"
+PKG_CONTENTS[1]="share/doc share/man
+                 --exclude share/doc/${PN}/${PV}/COPYING"
+PKG_CONTENTS[2]="share/doc/${PN}/${PV}/COPYING"
+
+PATCH_URI="makefile.patch"
+
+src_compile() {
+  cd ${S}
+
+  # Mirror the source into the build directory.
+  lndirs
+
+  cd ${B}
+
+  # Clean pre-compiled gnu/*.o files.
+  mgwmake clean
+
+  mgwmake
+}
+
+src_test() {
+  echo "This package does not define any tests."
+}

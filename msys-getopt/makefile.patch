@@ -1,0 +1,24 @@
+--- origsrc/getopt-1.1.5/Makefile	2012-08-12 09:07:43 +0000
++++ src/getopt-1.1.5/Makefile	2014-02-20 12:57:28 +0000
+@@ -1,7 +1,7 @@
+ .SUFFIXES:
+ 
+ DESTDIR=
+-prefix=/usr/local
++prefix=/usr
+ bindir=$(prefix)/bin
+ mandir=$(prefix)/man
+ man1dir=$(mandir)/man1
+@@ -10,10 +10,10 @@ getoptdir=$(sharedir)/getopt
+ localedir=$(sharedir)/locale
+ 
+ # Define this to 0 to use the getopt(3) routines in this package.
+-LIBCGETOPT=1
++LIBCGETOPT=0
+ 
+ # Define this to 1 if you do not have the gettext routines
+-WITHOUT_GETTEXT=0
++WITHOUT_GETTEXT=1
+ 
+ # For creating the archive
+ PACKAGE=getopt

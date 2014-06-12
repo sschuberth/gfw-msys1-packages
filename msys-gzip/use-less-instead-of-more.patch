@@ -1,0 +1,8 @@
+--- origsrc/gzip-1.6/zmore.in	2013-02-02 04:39:13 +0000
++++ src/gzip-1.6/zmore.in	2014-06-12 19:40:37 +0000
+@@ -57,4 +57,4 @@ do
+   test $# -lt 2 ||
+     printf '::::::::::::::\n%s\n::::::::::::::\n' "$FILE" || break
+   gzip -cdfq -- "$FILE"
+-done 2>&1 | eval ${PAGER-more}
++done 2>&1 | eval ${PAGER-less}

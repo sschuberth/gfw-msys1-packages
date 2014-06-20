@@ -1,0 +1,37 @@
+From a98e9891fe2da86ed2aca2acc89eda5d6a3ed7c6 Mon Sep 17 00:00:00 2001
+From: Doug Kelly <dougk.ff7@gmail.com>
+Date: Fri, 20 Jun 2014 15:57:40 -0500
+Subject: [PATCH] Add multibyte support to MSYS
+
+Our patched MSYS uses the same newlib as Cygwin, which may return
+the first half of a surrogate and return that three bytes were read
+by mbrtowc().
+---
+ src/searchutils.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/searchutils.c b/src/searchutils.c
+index 5eb9a12..bda52ec 100644
+--- a/src/searchutils.c
++++ b/src/searchutils.c
+@@ -111,7 +111,7 @@ mbtoupper (const char *beg, size_t *n, mb_len_map_t **len_map_p)
+     {
+       wchar_t wc;
+       size_t mbclen = mbrtowc (&wc, beg, end - beg, &is);
+-#ifdef __CYGWIN__
++#if defined(__CYGWIN__) || defined(__MSYS__)
+       /* Handle a UTF-8 sequence for a character beyond the base plane.
+          Cygwin's wchar_t is UTF-16, as in the underlying OS.  This
+          results in surrogate pairs which need some extra attention.  */
+@@ -165,7 +165,7 @@ mbtoupper (const char *beg, size_t *n, mb_len_map_t **len_map_p)
+         {
+           size_t ombclen;
+           beg += mbclen;
+-#ifdef __CYGWIN__
++#if defined(__CYGWIN__) || defined(__MSYS__)
+           /* Handle Unicode characters beyond the base plane.  */
+           if (mbclen == 4)
+             {
+-- 
+1.9.4.msysgit.0.27.gee7192e.dirty
+

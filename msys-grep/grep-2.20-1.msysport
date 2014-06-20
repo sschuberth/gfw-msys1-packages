@@ -6,8 +6,8 @@ HOMEPAGE="http://www.gnu.org/software/grep/"
 SRC_URI="http://ftpmirror.gnu.org/${PN}/${PN}-${PV}.tar.xz
          http://ftpmirror.gnu.org/${PN}/${PN}-${PV}.tar.xz.sig"
 
-PATCH_URI="add-msys-to-config-guess-and-sub.patch
-           add_wctype-definition.patch"
+PATCH_URI="add_wctype-definition.patch
+           0001-Add-multibyte-support-to-MSYS.patch"
 
 PKG_NAMES="${PN} ${PN} ${PN}"
 

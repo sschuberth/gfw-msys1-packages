@@ -8,7 +8,6 @@ For convenience, the _*.xml.lzma_ files are supposed to be (de-)compressed on-th
 
     [diff "lzma"]
     	textconv = lzma -d -c -qq | cat
-    	cachetextconv = true
     [filter "lzma"]
     	smudge = lzma -d
     	clean = lzma -z

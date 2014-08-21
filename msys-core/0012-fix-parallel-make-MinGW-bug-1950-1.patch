@@ -1,0 +1,31 @@
+From fa6a57ae899013b4022dc6199de7f90d091c94cc Mon Sep 17 00:00:00 2001
+From: Karsten Blees <blees@dcon.de>
+Date: Thu, 21 Aug 2014 11:52:13 +0200
+Subject: [PATCH] fix parallel make (MinGW bug #1950 [1])
+
+It seems 1.0.18 ported the wincap feature from Cygwin, but without the bug
+fixes (from 2001!).
+
+[1] http://sourceforge.net/p/mingw/bugs/1950
+
+Signed-off-by: Karsten Blees <blees@dcon.de>
+---
+ winsup/cygwin/fhandler.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/winsup/cygwin/fhandler.h b/winsup/cygwin/fhandler.h
+index c142c3c..6db5eb4 100644
+--- a/winsup/cygwin/fhandler.h
++++ b/winsup/cygwin/fhandler.h
+@@ -442,7 +442,7 @@ public:
+   /* This strange test is due to the fact that we can't rely on
+      Windows shells to "do the right thing" with pipes.  Apparently
+      the can keep one end of the pipe open when it shouldn't be. */
+-  BOOL is_slow () {return wincap.has_unreliable_pipes ();}
++  BOOL is_slow () {return !wincap.has_unreliable_pipes ();}
+   select_record *select_read (select_record *s);
+   select_record *select_write (select_record *s);
+   select_record *select_except (select_record *s);
+-- 
+2.1.0.msysgit.0
+

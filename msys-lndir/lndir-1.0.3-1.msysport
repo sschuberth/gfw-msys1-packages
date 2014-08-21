@@ -1,0 +1,27 @@
+DESCRIPTION="X.Org recursive directory symlink tool"
+SRC_URI="http://xorg.freedesktop.org/releases/individual/util/${P}.tar.bz2"
+
+PATCH_URI="0001-de-X-ify-lndir.c.patch"
+
+PKG_COMPTYPES="bin doc lic"
+PKG_CONTENTS[0]="bin"
+PKG_CONTENTS[1]="--exclude=share/doc/${PN}/${PV}/COPYING share/doc share/man"
+PKG_CONTENTS[2]="share/doc/${PN}/${PV}/COPYING"
+
+src_compile() {
+  cd ${B}
+  CFLAGS="-O3 -fno-unit-at-a-time -s -march=i386 -mtune=i686"
+  CPPFLAGS="-D__CYGWIN__"
+  LDFLAGS="-Wl,--enable-auto-import"
+  gcc ${CFLAGS} ${CPPFLAGS} ${LDFLAGS} -o lndir.exe ${S}/lndir.c
+}
+
+src_install() {
+  cd ${B}
+  dobin lndir.exe
+
+  cp ${S}/lndir.man lndir.1
+  doman lndir.1
+
+  dodoc COPYING ChangeLog README
+}

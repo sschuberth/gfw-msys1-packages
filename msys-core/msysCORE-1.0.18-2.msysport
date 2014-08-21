@@ -13,7 +13,8 @@ PATCH_URI="0001-Tweak-msys_p2w-for-msysgit.patch
            0007-only-override-the-variables-HOMEPATH-and-HOMEDRIVE-i.patch
            0008-Do-not-start-the-fstab-observer-thread.patch
            0009-spawning-of-processes-combine-for-loops-and-resolve-.patch
-           0010-msys.dll-Don-t-pull-user32.dll-friends-just-to-detec.patch"
+           0010-msys.dll-Don-t-pull-user32.dll-friends-just-to-detec.patch
+           0011-stat-lstat-drop-sub-directory-counting-for-directori.patch"
 
 PKG_COMPTYPES="bin ext dev doc lic"
 PKG_CONTENTS[0]="bin/msys-1.0.dll

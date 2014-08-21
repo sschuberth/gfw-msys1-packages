@@ -1,0 +1,110 @@
+From e0fac9b850f3d850fe05286244bf1a8ecb8a40e9 Mon Sep 17 00:00:00 2001
+From: Karsten Blees <blees@dcon.de>
+Date: Thu, 21 Aug 2014 11:16:24 +0200
+Subject: [PATCH] stat/lstat: drop sub-directory counting for directories
+
+The stat.st_nlink field is the "Number of hard links to the file." [1].
+Most systems do not allow hard links to directories (via 'link()'), so
+st_nlink for directories is typically 1.
+
+Some *nix file systems internally implement '.' and '..' as special "hard
+links" and expose this information via the st_nlink field. With such file
+systems, st_nlink for a directory is the number of sub-directories + 2.
+It is impossible to provide a POSIX compliant rmdir implementation with
+these semantics (the '.' and '..' entries are removed _after_ the link
+count becomes 0) [2].
+
+However, some progams (e.g. find, lndir) can in some cases exploit this
+bug to optimize directory traversal. Older versions of such programs may
+have bugs that _require_ st_nlink to be the sub-directory count (e.g. [3]).
+
+Currently, _every_ [l]stat call for a directory counts the number of sub-
+dirctories by doing a full directory listing. This slows down [l]stat by
+at least factor 2 (for empty dirs, factor 10 for dirs with ~500 entries).
+
+Drop sub-directory counting from the stat/lstat implementation.
+
+Note: Cygwin dropped sub-directory counting in 1.7 (first released 2009).
+
+[1] http://pubs.opengroup.org/onlinepubs/009695399/basedefs/sys/stat.h.html
+[2] http://pubs.opengroup.org/onlinepubs/009695399/functions/rmdir.html
+[3] http://cgit.freedesktop.org/xorg/util/lndir/commit/lndir.c?id=23bacbd6c71ec815f394f0a7bbc9e684b3e05438
+
+Signed-off-by: Karsten Blees <blees@dcon.de>
+---
+ winsup/cygwin/syscalls.cc | 45 ---------------------------------------------
+ 1 file changed, 45 deletions(-)
+
+diff --git a/winsup/cygwin/syscalls.cc b/winsup/cygwin/syscalls.cc
+index 36abfc0..5b05451 100644
+--- a/winsup/cygwin/syscalls.cc
++++ b/winsup/cygwin/syscalls.cc
+@@ -904,36 +904,6 @@ fchmod (int fd, mode_t mode)
+   return chmod (path, mode);
+ }
+ 
+-/* Cygwin internal */
+-static int
+-num_entries (const char *win32_name)
+-{
+-  WIN32_FIND_DATA buf;
+-  HANDLE handle;
+-  char buf1[MAX_PATH];
+-  int count = 0;
+-
+-  strcpy (buf1, win32_name);
+-  int len = strlen (buf1);
+-  if (len == 0 || isdirsep (buf1[len - 1]))
+-    strcat (buf1, "*");
+-  else
+-    strcat (buf1, "/*");	/* */
+-
+-  handle = FindFirstFileA (buf1, &buf);
+-
+-  if (handle == INVALID_HANDLE_VALUE)
+-    return 0;
+-  count ++;
+-  while (FindNextFileA (handle, &buf))
+-    {
+-      if ((buf.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
+-	count ++;
+-    }
+-  FindClose (handle);
+-  return count;
+-}
+-
+ extern "C" int
+ _fstat (int fd, struct stat *buf)
+ {
+@@ -1095,17 +1065,6 @@ stat_worker (const char *caller, const char *name, struct stat *buf, int nofollo
+ 	{
+ 	  res = fh.fstat (buf);
+ 	  fh.close ();
+-	  /* The number of links to a directory includes the
+-	     number of subdirectories in the directory, since all
+-	     those subdirectories point to it.
+-	     This is too slow on remote drives, so we do without it and
+-	     set the number of links to 2. */
+-	  /* Unfortunately the count of 2 confuses `find (1)' command. So
+-	     let's try it with `1' as link count. */
+-	  if (atts != -1 && (atts & FILE_ATTRIBUTE_DIRECTORY))
+-	    buf->st_nlink = (dtype == DRIVE_REMOTE
+-			     ? 1
+-			     : num_entries (real_path.get_win32 ()));
+ 	  goto done;
+ 	}
+     }
+@@ -1117,10 +1076,6 @@ stat_worker (const char *caller, const char *name, struct stat *buf, int nofollo
+       WIN32_FIND_DATA wfd;
+       HANDLE handle;
+       buf->st_nlink = 1;
+-      if (atts != -1
+-	  && (atts & FILE_ATTRIBUTE_DIRECTORY)
+-	  && dtype != DRIVE_REMOTE)
+-	buf->st_nlink = num_entries (real_path.get_win32 ());
+       buf->st_dev = FHDEVN (FH_DISK) << 8;
+       buf->st_ino = hash_path_name (0, real_path.get_win32 ());
+       if (atts != -1 && (atts & FILE_ATTRIBUTE_DIRECTORY))
+-- 
+2.1.0.msysgit.0
+

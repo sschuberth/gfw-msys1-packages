@@ -1,0 +1,779 @@
+diff -urN old/bash-3.1/Makefile.in new/bash-3.1/Makefile.in
+--- old/bash-3.1/Makefile.in	2010-10-23 11:06:41 +0000
++++ new/bash-3.1/Makefile.in	2010-10-23 11:00:03 +0000
+@@ -794,7 +794,8 @@
+ 	@-test -d tests || mkdir tests
+ 	@cp $(TESTS_SUPPORT) tests
+ 	@( cd $(srcdir)/tests && \
+-		PATH=$(BUILD_DIR)/tests:$$PATH THIS_SH=$(THIS_SH) $(SHELL) ${TESTSCRIPT} )
++		lpath=`echo $$PATH | sed -e 's|:/bin:|:|g' -e 's|:/mingw/bin:|:|g' -e 's|$(BUILD_DIR)/tests:||g'` && \
++		PATH=$(BUILD_DIR)/tests:/bin:/mingw/bin:$$lpath THIS_SH=$(THIS_SH) $(SHELL) ${TESTSCRIPT} )
+ 
+ symlinks:
+ 	$(SHELL) $(SUPPORT_SRC)fixlinks -s $(srcdir)
+diff -urN old/bash-3.1/bashline.c new/bash-3.1/bashline.c
+--- old/bash-3.1/bashline.c	2010-10-23 11:06:41 +0000
++++ new/bash-3.1/bashline.c	2010-10-23 11:52:28 +0000
+@@ -630,7 +630,11 @@
+   char *temp, buffer[256], name[256];
+   register int i, start;
+ 
++#ifdef __MSYS__
++  file = fopen (filename, "rt");
++#else
+   file = fopen (filename, "r");
++#endif
+   if (file == 0)
+     return;
+ 
+@@ -1493,7 +1497,16 @@
+ 
+       /* If we have found a match, and it is an executable file or a
+ 	 directory name, return it. */
+-      if (match && executable_or_directory (val))
++      if (match && (
++#if __CYGWIN__
++		    /* executable_or_directory will do the right thing on
++		       //server, but calling stat("//server") is an order
++		       of magnitude slower than noting that readdir("//")
++		       only returns directories.  */
++		    (val[0] == '/' && val[1] == '/' && ! strchr (&val[2], '/'))
++		    ||
++#endif /* __CYGWIN__ */
++                   executable_or_directory (val)))
+ 	{
+ 	  free (val);
+ 	  val = "";		/* So it won't be NULL. */
+@@ -2225,6 +2238,17 @@
+   char *fn;
+ 
+   fn = bash_tilde_expand (name, 0);
++#if __CYGWIN__
++  /* Although this leads to false positives if NAME is random, it is worth the
++     speedup to assume //server is a directory rather than waiting the couple
++     of seconds for stat("//server") to complete.  */
++  if (fn[0] == '/' && fn[1] == '/' && ! strchr (&fn[2], '/'))
++    {
++      free (fn);
++      return 1;
++    }
++#endif /* __CYGWIN__ */
++
+   if (stat (fn, &finfo) != 0)
+     {
+       free (fn);
+diff -urN old/bash-3.1/builtins/cd.def new/bash-3.1/builtins/cd.def
+--- old/bash-3.1/builtins/cd.def	2010-10-23 11:06:41 +0000
++++ new/bash-3.1/builtins/cd.def	2010-10-23 11:00:02 +0000
+@@ -315,10 +315,12 @@
+ 
+ $BUILTIN pwd
+ $FUNCTION pwd_builtin
+-$SHORT_DOC pwd [-LP]
++$SHORT_DOC pwd [-LPW]
+ Print the current working directory.  With the -P option, pwd prints
+ the physical directory, without any symbolic links; the -L option
+-makes pwd follow symbolic links.
++makes pwd follow symbolic links; the -W option makes pwd print the Win32 value
++of the physical directory.
++
+ $END
+ 
+ /* Non-zero means that pwd always prints the physical directory, without
+@@ -330,19 +332,22 @@
+ pwd_builtin (list)
+      WORD_LIST *list;
+ {
+-  char *directory;
++  char *directory, *buffer, *wbuffer;
+   int opt, pflag;
+ 
+   verbatim_pwd = no_symbolic_links;
+   pflag = 0;
+   reset_internal_getopt ();
+-  while ((opt = internal_getopt (list, "LP")) != -1)
++  while ((opt = internal_getopt (list, "LPW")) != -1)
+     {
+       switch (opt)
+ 	{
+ 	case 'P':
+ 	  verbatim_pwd = pflag = 1;
+ 	  break;
++	case 'W':
++	  verbatim_pwd = 2;
++	  break;
+ 	case 'L':
+ 	  verbatim_pwd = 0;
+ 	  break;
+@@ -353,18 +358,32 @@
+     }
+   list = loptend;
+ 
++  if (verbatim_pwd == 2) {
++    buffer = xmalloc (PATH_MAX);
++    wbuffer = xmalloc (PATH_MAX);
++    directory = getcwd (buffer, PATH_MAX);
++    cygwin_conv_to_win32_path (buffer, wbuffer);
++    {
++      char *c = wbuffer;
++      while (c = strchr (c, '\\'))
++	*c = '/';
++    }
++    free (buffer);
++    directory = wbuffer;
++  } else {
+ #define tcwd the_current_working_directory
+ 
+-  directory = tcwd ? (verbatim_pwd ? sh_physpath (tcwd, 0) : tcwd)
+-		   : get_working_directory ("pwd");
++    directory = tcwd ? (verbatim_pwd ? sh_physpath (tcwd, 0) : tcwd)
++		     : get_working_directory ("pwd");
+ 
+-  /* Try again using getcwd() if canonicalization fails (for instance, if
+-     the file system has changed state underneath bash). */
+-  if ((tcwd && directory == 0) ||
+-      (posixly_correct && same_file (".", tcwd, (struct stat *)0, (struct stat *)0) == 0))
+-    directory = resetpwd ("pwd");
++    /* Try again using getcwd() if canonicalization fails (for instance, if
++       the file system has changed state underneath bash). */
++    if ((tcwd && directory == 0) ||
++       (posixly_correct && same_file (".", tcwd, (struct stat *)0, (struct stat *)0) == 0))
++      directory = resetpwd ("pwd");
+ 
+ #undef tcwd
++}
+ 
+   if (directory)
+     {
+diff -urN old/bash-3.1/builtins/evalfile.c new/bash-3.1/builtins/evalfile.c
+--- old/bash-3.1/builtins/evalfile.c	2010-10-23 11:06:41 +0000
++++ new/bash-3.1/builtins/evalfile.c	2010-10-23 11:11:37 +0000
+@@ -143,7 +143,7 @@
+       return ((flags & FEVAL_BUILTIN) ? EXECUTION_FAILURE : -1);
+     }      
+ 
+-#if defined (__CYGWIN__) && defined (O_TEXT)
++#if (defined (__CYGWIN__) && !defined(__MSYS__) /* DO NOT USE IN MSYS*/) && defined (O_TEXT)
+   setmode (fd, O_TEXT);
+ #endif
+ 
+diff -urN old/bash-3.1/builtins/fc.def new/bash-3.1/builtins/fc.def
+--- old/bash-3.1/builtins/fc.def	2010-10-23 11:06:41 +0000
++++ new/bash-3.1/builtins/fc.def	2010-10-23 11:00:02 +0000
+@@ -527,6 +527,10 @@
+      FILE *stream;
+ {
+   register int c;
++#ifdef __MSYS__
++  register int d;
++#endif
++
+   int line_len = 0, lindex = 0;
+   char *line = (char *)NULL;
+ 
+@@ -537,12 +541,19 @@
+ 
+       if (c == '\n')
+ 	{
++#ifdef __MSYS__
++	  if (d == '\r')
++	    lindex--;
++#endif
+ 	  line[lindex++] = '\n';
+ 	  line[lindex++] = '\0';
+ 	  return (line);
+ 	}
+       else
+ 	line[lindex++] = c;
++#ifdef __MSYS__
++      d = c;
++#endif
+     }
+ 
+   if (!lindex)
+diff -urN old/bash-3.1/builtins/read.def new/bash-3.1/builtins/read.def
+--- old/bash-3.1/builtins/read.def	2010-10-23 11:06:41 +0000
++++ new/bash-3.1/builtins/read.def	2010-10-23 11:12:58 +0000
+@@ -378,7 +378,7 @@
+ 
+   unbuffered_read = (nchars > 0) || (delim != '\n') || input_is_pipe;
+ 
+-#if defined (__CYGWIN__) && defined (O_TEXT)
++#if (defined (__CYGWIN__) && !defined(__MSYS__) /* DO NOT USE IN MSYS*/) && defined (O_TEXT)
+   setmode (0, O_TEXT);
+ #endif
+ 
+diff -urN old/bash-3.1/config-top.h new/bash-3.1/config-top.h
+--- old/bash-3.1/config-top.h	2010-10-23 11:06:41 +0000
++++ new/bash-3.1/config-top.h	2010-10-23 11:25:36 +0000
+@@ -84,4 +84,4 @@
+ 
+ /* Define this if you want bash to try to check whether it's being run by
+    sshd and source the .bashrc if so (like the rshd behavior). */
+-/* #define SSH_SOURCE_BASHRC */
++#define SSH_SOURCE_BASHRC
+diff -urN old/bash-3.1/configure.in new/bash-3.1/configure.in
+--- old/bash-3.1/configure.in	2010-10-23 11:06:41 +0000
++++ new/bash-3.1/configure.in	2010-10-23 11:00:03 +0000
+@@ -87,6 +87,7 @@
+ *-bsdi2.1|*-bsdi3.?)	opt_bash_malloc=no ; : ${CC:=shlicc2} ;; # for loadable builtins
+ *-beos*)	opt_bash_malloc=no ;;	# they say it's suitable
+ *-cygwin*)	opt_bash_malloc=no ;;	# Cygnus's CYGWIN environment
++*-msys*)	opt_bash_malloc=no ;;	# Cygnus's CYGWIN environment
+ *-opennt*|*-interix*)	opt_bash_malloc=no ;;	# Interix, now owned by Microsoft
+ esac
+ 
+@@ -384,6 +385,10 @@
+ 
+ if test "x$cross_compiling" = "xyes"; then
+     case "${host}" in
++    *-msys*)
++	cross_cache=${srcdir}/cross-build/cygwin32.cache
++	SIGNAMES_H='$(srcdir)/cross-build/win32sig.h'
++	;;
+     *-cygwin*)
+ 	cross_cache=${srcdir}/cross-build/cygwin32.cache
+ 	SIGNAMES_H='$(srcdir)/cross-build/win32sig.h'
+@@ -507,6 +512,7 @@
+ 		# to be compiled into dynamic libraries.
+ 		case "$host_os" in
+ 		cygwin*)	TILDE_LIB= ;;
++		msys*)	TILDE_LIB= ;;
+ 		esac
+ 	else
+ 		RL_LIBDIR='$(dot)/$(LIBSUBDIR)/readline'
+@@ -997,6 +1003,7 @@
+ *qnx*)		LOCAL_CFLAGS="-Dqnx -F -3s" LOCAL_LDFLAGS="-3s" LOCAL_LIBS="-lunix -lncurses" ;;
+ powerux*)	LOCAL_LIBS="-lgen" ;;
+ cygwin*)	LOCAL_CFLAGS=-DRECYCLES_PIDS ;;
++msys*)	LOCAL_CFLAGS=-DRECYCLES_PIDS ;;
+ opennt*|interix*) LOCAL_CFLAGS="-DNO_MAIN_ENV_ARG -DBROKEN_DIRENT_D_INO -D_POSIX_SOURCE" ;;
+ esac
+ 
+diff -urN old/bash-3.1/doc/Makefile.in new/bash-3.1/doc/Makefile.in
+--- old/bash-3.1/doc/Makefile.in	2010-10-23 11:06:41 +0000
++++ new/bash-3.1/doc/Makefile.in	2010-10-23 11:42:12 +0000
+@@ -167,7 +167,7 @@
+ bashref.html: $(BASHREF_FILES) $(HSUSER) $(RLUSER)
+ 	$(TEXI2HTML) -menu -monolithic -I $(TEXINPUTDIR) $(srcdir)/bashref.texi
+ 
+-bash.info: bashref.info
++bash.info: $(srcdir)/bashref.info
+ 	${SHELL} ${INFOPOST} < $(srcdir)/bashref.info > $@ ; \
+ 
+ bash.txt: bash.1
+@@ -224,8 +224,8 @@
+ 	-$(INSTALL_DATA) $(srcdir)/bash.1 $(DESTDIR)$(man1dir)/bash${man1ext}
+ 	-$(INSTALL_DATA) $(srcdir)/bashbug.1 $(DESTDIR)$(man1dir)/bashbug${man1ext}
+ # uncomment the next line to install the builtins man page
+-#	-$(INSTALL_DATA) $(srcdir)/builtins.1 $(DESTDIR)$(man1dir)/bash_builtins${man1ext}
+-	-$(INSTALL_DATA) $(srcdir)/bash.info $(DESTDIR)$(infodir)/bash.info
++	-$(INSTALL_DATA) $(srcdir)/builtins.1 $(DESTDIR)$(man1dir)/bash_builtins${man1ext}
++	-$(INSTALL_DATA) bash.info $(DESTDIR)$(infodir)/bash.info
+ # run install-info if it is present to update the info directory
+ 	if $(SHELL) -c 'install-info --version' >/dev/null 2>&1; then \
+ 		install-info --dir-file=$(DESTDIR)$(infodir)/dir $(DESTDIR)$(infodir)/bash.info; \
+diff -urN old/bash-3.1/doc/builtins.1 new/bash-3.1/doc/builtins.1
+--- old/bash-3.1/doc/builtins.1	2010-10-23 11:06:41 +0000
++++ new/bash-3.1/doc/builtins.1	2010-10-23 11:00:03 +0000
+@@ -10,6 +10,6 @@
+ ulimit, umask, unalias, unset, wait \- bash built-in commands, see \fBbash\fR(1)
+ .SH BASH BUILTIN COMMANDS
+ .nr zZ 1
+-.so bash.1
++.so man1/bash.1
+ .SH SEE ALSO
+ bash(1), sh(1)
+diff -urN old/bash-3.1/findcmd.c new/bash-3.1/findcmd.c
+--- old/bash-3.1/findcmd.c	2010-10-23 11:06:41 +0000
++++ new/bash-3.1/findcmd.c	2010-10-23 11:26:21 +0000
+@@ -94,7 +94,7 @@
+ 
+   r = FS_EXISTS;
+ 
+-#if defined (AFS)
++#if defined (AFS) || defined(__CYGWIN__)
+   /* We have to use access(2) to determine access because AFS does not
+      support Unix file system semantics.  This may produce wrong
+      answers for non-AFS files when ruid != euid.  I hate AFS. */
+diff -urN old/bash-3.1/general.c new/bash-3.1/general.c
+--- old/bash-3.1/general.c	2010-10-23 11:06:41 +0000
++++ new/bash-3.1/general.c	2010-10-23 11:42:50 +0000
+@@ -534,7 +534,8 @@
+ absolute_program (string)
+      const char *string;
+ {
+-  return ((char *)xstrchr (string, '/') != (char *)NULL);
++  return ((char *)xstrchr (string, '/') != (char *)NULL ||
++          (char *)xstrchr (string, '\\') != (char *)NULL);
+ }
+ 
+ /* **************************************************************** */
+diff -urN old/bash-3.1/include/posixdir.h new/bash-3.1/include/posixdir.h
+--- old/bash-3.1/include/posixdir.h	2010-10-23 11:06:41 +0000
++++ new/bash-3.1/include/posixdir.h	2010-10-23 11:43:19 +0000
+@@ -50,7 +50,7 @@
+ #  define d_fileno d_ino
+ #endif
+ 
+-#if defined (_POSIX_SOURCE) && (!defined (HAVE_STRUCT_DIRENT_D_INO) || defined (BROKEN_DIRENT_D_INO))
++#if !defined (HAVE_STRUCT_DIRENT_D_INO) || defined (BROKEN_DIRENT_D_INO)
+ /* Posix does not require that the d_ino field be present, and some
+    systems do not provide it. */
+ #  define REAL_DIR_ENTRY(dp) 1
+diff -urN old/bash-3.1/lib/readline/complete.c new/bash-3.1/lib/readline/complete.c
+--- old/bash-3.1/lib/readline/complete.c	2010-10-23 11:06:41 +0000
++++ new/bash-3.1/lib/readline/complete.c	2010-10-23 11:14:32 +0000
+@@ -481,6 +481,16 @@
+   struct stat finfo;
+   int character, r;
+ 
++#if __CYGWIN__
++  /* Cygwin stat("//server") can take several seconds when the server is
++     non-responsive, all to find out it will always behave as a directory.
++     Although this shortcut may sometimes provide a false positive, it is
++     worth the speedup in time if all callers validated that FILENAME exists
++     from a (much faster) readdir rather than calling stat. */
++  if (filename[0] == '/' && filename[1] == '/' && ! strchr (&filename[2], '/'))
++    return '/';
++#endif
++
+ #if defined (HAVE_LSTAT) && defined (S_ISLNK)
+   r = lstat (filename, &finfo);
+ #else
+diff -urN old/bash-3.1/lib/readline/display.c new/bash-3.1/lib/readline/display.c
+--- old/bash-3.1/lib/readline/display.c	2010-10-23 11:06:41 +0000
++++ new/bash-3.1/lib/readline/display.c	2010-10-23 11:43:44 +0000
+@@ -307,7 +307,10 @@
+   if (lp)
+     *lp = rl;
+   if (lip)
+-    *lip = last;
++    /* Hack: faking that the last character is invisible seems to work around
++       prompt display bugs.  I wish I knew what the real bug was...  */
++    *lip = r - ret;
++/*     *lip = last; */
+   if (niflp)
+     *niflp = invfl;
+   if  (vlp)
+diff -urN old/bash-3.1/lib/sh/pathcanon.c new/bash-3.1/lib/sh/pathcanon.c
+--- old/bash-3.1/lib/sh/pathcanon.c	2010-10-23 11:06:41 +0000
++++ new/bash-3.1/lib/sh/pathcanon.c	2010-10-23 11:43:59 +0000
+@@ -42,7 +42,7 @@
+ extern int errno;
+ #endif
+ 
+-#if defined (__CYGWIN__)
++#if defined (__CYGWIN__) && !defined (__MSYS__) /* not used in MSYS */
+ #include <sys/cygwin.h>
+ 
+ static int
+@@ -68,7 +68,7 @@
+     }
+   return !strcasecmp (path, user) || !strcasecmp (path, system);
+ }
+-#endif /* __CYGWIN__ */	
++#endif /* __CYGWIN__ && ! __MSYS__ */ /* not used in MSYS */
+ 
+ /* Return 1 if PATH corresponds to a directory.  A function for debugging. */
+ static int
+@@ -81,7 +81,7 @@
+   /* This should leave errno set to the correct value. */
+   errno = 0;
+   l = stat (path, &sb) == 0 && S_ISDIR (sb.st_mode);
+-#if defined (__CYGWIN__)
++#if defined (__CYGWIN__) && !defined (__MSYS__) /* not used in MSYS */
+   if (l == 0)
+     l = _is_cygdrive (path);
+ #endif
+@@ -194,24 +194,25 @@
+ 	    *q++ = DIRSEP;
+ 	  while (*p && (ISDIRSEP(*p) == 0))
+ 	    *q++ = *p++;
+-	  /* Check here for a valid directory with _path_isdir. */
+-	  if (flags & PATH_CHECKEXISTS)
+-	    {
+-	      char c;
++	}
++    } /* while */
+ 
+-	      /* Make sure what we have so far corresponds to a valid
+-		 path before we chop some of it off. */
+-	      c = *q;
+-	      *q = '\0';
+-	      if (_path_isdir (result) == 0)
+-		{
+-		  if ((flags & PATH_NOALLOC) == 0)
+-		    free (result);
+-		  return ((char *)NULL);
+-		}
+-	      *q = c;
+-	    }
++  /* Check here for a valid directory with _path_isdir. */
++  if (flags & PATH_CHECKEXISTS)
++    {
++      char c;
++
++      /* Make sure what we have so far corresponds to a valid
++	 path before we chop some of it off. */
++      c = *q;
++      *q = '\0';
++      if (_path_isdir (result) == 0)
++	{
++	  if ((flags & PATH_NOALLOC) == 0)
++	    free (result);
++	  return ((char *)NULL);
+ 	}
++      *q = c;
+     }
+ 
+   /* Empty string is really ``.'' or `/', depending on what we started with. */
+diff -urN old/bash-3.1/lib/sh/pathphys.c new/bash-3.1/lib/sh/pathphys.c
+--- old/bash-3.1/lib/sh/pathphys.c	2010-10-23 11:06:41 +0000
++++ new/bash-3.1/lib/sh/pathphys.c	2010-10-23 11:22:51 +0000
+@@ -36,6 +36,7 @@
+ #include <chartypes.h>
+ #include <errno.h>
+ 
++#include <stdlib.h>
+ #include "shell.h"
+ 
+ #if !defined (MAXSYMLINKS)
+@@ -76,6 +77,10 @@
+      char *path;
+      int flags;
+ {
++#if defined(__CYGWIN__) && !defined(__MSYS__) /* FIXME: || __MSYS__ // realpath is causing bash to abort */
++  /* realpath does this right without all the hassle */
++  return realpath (path, NULL);
++#else
+   char tbuf[PATH_MAX+1], linkbuf[PATH_MAX+1];
+   char *result, *p, *q, *qsave, *qbase, *workpath;
+   int double_slash_path, linklen, nlink;
+@@ -249,6 +254,7 @@
+     }
+ 
+   return (result);
++#endif /* ! __CYGWIN__ || __MSYS__ (thus, MSYS + unix)*/
+ }
+ 
+ char *
+diff -urN old/bash-3.1/lib/sh/tmpfile.c new/bash-3.1/lib/sh/tmpfile.c
+--- old/bash-3.1/lib/sh/tmpfile.c	2010-10-23 11:06:41 +0000
++++ new/bash-3.1/lib/sh/tmpfile.c	2010-10-23 11:23:26 +0000
+@@ -40,7 +40,7 @@
+ extern int errno;
+ #endif
+ 
+-#define BASEOPENFLAGS	(O_CREAT | O_TRUNC | O_EXCL)
++#define BASEOPENFLAGS	(O_CREAT | O_TRUNC | O_EXCL | O_BINARY)
+ 
+ #define DEFAULT_TMPDIR		"."	/* bogus default, should be changed */
+ #define DEFAULT_NAMEROOT	"shtmp"
+diff -urN old/bash-3.1/parse.y new/bash-3.1/parse.y
+--- old/bash-3.1/parse.y	2010-10-23 11:06:41 +0000
++++ new/bash-3.1/parse.y	2010-10-23 11:00:03 +0000
+@@ -1147,7 +1147,13 @@
+ static int
+ yy_getc ()
+ {
++#ifdef __MSYS__
++  int c;
++  while ((c = (*(bash_input.getter)) ()) == '\r');
++  return c;
++#else
+   return (*(bash_input.getter)) ();
++#endif
+ }
+ 
+ /* Call this to unget C.  That is, to make C the next character
+diff -urN old/bash-3.1/redir.c new/bash-3.1/redir.c
+--- old/bash-3.1/redir.c	2010-10-23 11:06:41 +0000
++++ new/bash-3.1/redir.c	2010-10-23 11:32:38 +0000
+@@ -402,7 +402,7 @@
+   /* In an attempt to avoid races, we close the first fd only after opening
+      the second. */
+   /* Make the document really temporary.  Also make it the input. */
+-  fd2 = open (filename, O_RDONLY, 0600);
++  fd2 = open (filename, O_RDONLY | O_BINARY, 0600);
+ 
+   if (fd2 < 0)
+     {
+@@ -418,14 +418,14 @@
+   if (unlink (filename) < 0)
+     {
+       r = errno;
+-#if defined (__CYGWIN__)
++#if defined (__CYGWIN__) && !defined(__MSYS__) /* NOT USING in MSYS */
+       /* Under CygWin 1.1.0, the unlink will fail if the file is
+ 	 open. This hack will allow the previous action of silently
+ 	 ignoring the error, but will still leave the file there. This
+ 	 needs some kind of magic. */
+       if (r == EACCES)
+ 	return (fd2);
+-#endif /* __CYGWIN__ */
++#endif /* __CYGWIN__ && !__MSYS__ */ /* not used for __MSYS__ */
+       close (fd2);
+       free (filename);
+       errno = r;
+diff -urN old/bash-3.1/shell.c new/bash-3.1/shell.c
+--- old/bash-3.1/shell.c	2010-10-23 11:06:41 +0000
++++ new/bash-3.1/shell.c	2010-10-23 11:33:57 +0000
+@@ -1427,7 +1427,7 @@
+      not match with ours. */
+   fd = move_to_high_fd (fd, 0, -1);
+ 
+-#if defined (__CYGWIN__) && defined (O_TEXT)
++#if defined (__CYGWIN__) && !defined(__MSYS__) && defined (O_TEXT) /* not __MSYS__ */
+   setmode (fd, O_TEXT);
+ #endif
+ 
+@@ -1435,7 +1435,11 @@
+   default_buffered_input = fd;
+   SET_CLOSE_ON_EXEC (default_buffered_input);
+ #else /* !BUFFERED_INPUT */
++#ifdef __MSYS__
++  default_input = fdopen (fd, "rt");
++#else
+   default_input = fdopen (fd, "r");
++#endif
+ 
+   if (default_input == 0)
+     {
+@@ -1533,9 +1537,10 @@
+      any startup files; just try to be more like /bin/sh. */
+   shell_name = argv0 ? base_pathname (argv0) : PROGRAM;
+ 
+-  if (*shell_name == '-')
++  if (argv0 && *argv0 == '-')
+     {
+-      shell_name++;
++      if (*shell_name == '-')
++	shell_name++;
+       login_shell++;
+     }
+ 
+diff -urN old/bash-3.1/subst.c new/bash-3.1/subst.c
+--- old/bash-3.1/subst.c	2010-10-23 11:06:41 +0000
++++ new/bash-3.1/subst.c	2010-10-23 11:36:12 +0000
+@@ -221,6 +221,20 @@
+ static char *extract_delimited_string __P((char *, int *, char *, char *, char *, int));
+ static char *extract_dollar_brace_string __P((char *, int *, int, int));
+ 
++#ifdef __MSYS__
++static inline void RemoveCR ();
++static void
++RemoveCR (string)
++  char * string;
++{
++  char *pstr;
++  if (string && *string && (pstr = strchr (string, '\0')) && *(--pstr) == '\r')
++    *pstr = '\0';
++}
++#else
++#define RemoveCR(string) /**/
++#endif
++
+ static char *pos_params __P((char *, int, int, int));
+ 
+ static unsigned char *mb_getcharlens __P((char *, int));
+@@ -4430,7 +4444,7 @@
+       istring[istring_index++] = c;
+ 
+ #if 0
+-#if defined (__CYGWIN__)
++#if defined (__CYGWIN__) && !defined(__MSYS__) /* not used for __MSYS__ */
+       if (c == '\n' && istring_index > 1 && istring[istring_index - 2] == '\r')
+ 	{
+ 	  istring_index--;
+@@ -4485,6 +4499,12 @@
+   pid_t pid, old_pid, old_pipeline_pgrp, old_async_pid;
+   char *istring;
+   int result, fildes[2], function_value, pflags, rc;
++#if __CYGWIN__
++  /* Ensure that stdin, stdout, and stderr have a valid file descriptor, so
++     that pipe doesn't end up in those slots; otherwise a hang might
++     result when leaving one end of the pipe open in the subprocess. */
++  int i, closeit[3];
++#endif /* __CYGWIN__ */
+ 
+   istring = (char *)NULL;
+ 
+@@ -4514,6 +4534,18 @@
+   /* Flags to pass to parse_and_execute() */
+   pflags = interactive ? SEVAL_RESETLINE : 0;
+ 
++#if __CYGWIN__
++  /* See comments above */
++  for (i = 0; i <= 2; i++)
++    if (fcntl (i, F_GETFD, &result) != -1)
++      closeit[i] = 0;
++    else
++      {
++       open ("/dev/null", O_RDONLY);
++       closeit[i] = 1;
++      }
++#endif /* __CYGWIN__ */
++
+   /* Pipe the output of executing STRING into the current shell. */
+   if (pipe (fildes) < 0)
+     {
+@@ -4521,6 +4553,12 @@
+       goto error_exit;
+     }
+ 
++#if __CYGWIN__
++  for (i = 0; i <= 2; i++)
++    if (closeit[i])
++      close (i);
++#endif /* __CYGWIN__ */
++
+   old_pid = last_made_pid;
+ #if defined (JOB_CONTROL)
+   old_pipeline_pgrp = pipeline_pgrp;
+@@ -4574,6 +4612,7 @@
+ 	  exit (EXECUTION_FAILURE);
+ 	}
+ 
++#if !defined(__CYGWIN__)
+       /* If standard output is closed in the parent shell
+ 	 (such as after `exec >&-'), file descriptor 1 will be
+ 	 the lowest available file descriptor, and end up in
+@@ -4584,6 +4623,12 @@
+ 	  (fildes[1] != fileno (stdout)) &&
+ 	  (fildes[1] != fileno (stderr)))
+ 	close (fildes[1]);
++#else /* __CYGWIN__ */
++      /* We already ensured that none of the standard file descriptors were
++        occupied by either end of the pipe. */
++      close (fildes[1]);
++      close (fildes[0]);
++#endif /* __CYGWIN__ */
+ 
+       if ((fildes[0] != fileno (stdin)) &&
+ 	  (fildes[0] != fileno (stdout)) &&
+@@ -4673,6 +4718,7 @@
+ 	give_terminal_to (pipeline_pgrp, 0);
+ #endif /* JOB_CONTROL */
+ 
++      RemoveCR (istring);
+       return (istring);
+     }
+ }
+diff -urN old/bash-3.1/support/config.guess new/bash-3.1/support/config.guess
+--- old/bash-3.1/support/config.guess	2010-10-23 11:06:41 +0000
++++ new/bash-3.1/support/config.guess	2010-10-23 11:00:03 +0000
+@@ -773,6 +773,9 @@
+ 	rm -f $dummy.c && rmdir $tmpdir
+ 	echo ${UNAME_MACHINE}-unknown-freebsd`echo ${UNAME_RELEASE}|sed -e 's/[-(].*//'`${LIBC:+-$LIBC}
+ 	exit 0 ;;
++    i*:MSYS*:*)
++	echo ${UNAME_MACHINE}-pc-msys
++	exit 0 ;;
+     i*:CYGWIN*:*)
+ 	echo ${UNAME_MACHINE}-pc-cygwin
+ 	exit 0 ;;
+@@ -797,6 +800,9 @@
+     i*:UWIN*:*)
+ 	echo ${UNAME_MACHINE}-pc-uwin
+ 	exit 0 ;;
++    p*:MSYS*:*)
++       echo powerpcle-unknown-msys
++       exit 0 ;;
+     p*:CYGWIN*:*)
+ 	echo powerpcle-unknown-cygwin
+ 	exit 0 ;;
+diff -urN old/bash-3.1/support/config.sub new/bash-3.1/support/config.sub
+--- old/bash-3.1/support/config.sub	2010-10-23 11:06:41 +0000
++++ new/bash-3.1/support/config.sub	2010-10-23 11:00:03 +0000
+@@ -1108,7 +1108,7 @@
+ 	      | -ptx* | -coff* | -ecoff* | -winnt* | -domain* | -vsta* \
+ 	      | -udi* | -eabi* | -lites* | -ieee* | -go32* | -aux* \
+ 	      | -chorusos* | -chorusrdb* \
+-	      | -cygwin* | -pe* | -psos* | -moss* | -proelf* | -rtems* \
++	      | -cygwin* | -msys* | -pe* | -psos* | -moss* | -proelf* | -rtems* \
+ 	      | -mingw32* | -linux-gnu* | -uxpv* | -beos* | -mpeix* | -udk* \
+ 	      | -interix* | -uwin* | -mks* | -rhapsody* | -darwin* | -opened* \
+ 	      | -openstep* | -oskit* | -conix* | -pw32* | -nonstopux* \
+diff -urN old/bash-3.1/test.c new/bash-3.1/test.c
+--- old/bash-3.1/test.c	2010-10-23 11:06:41 +0000
++++ new/bash-3.1/test.c	2010-10-23 11:36:30 +0000
+@@ -104,7 +104,7 @@
+ /* We have to use access(2) for machines running AFS, because it's
+    not a Unix file system.  This may produce incorrect answers for
+    non-AFS files.  I hate AFS. */
+-#if defined (AFS)
++#if defined (AFS) || defined(__CYGWIN__)
+ #  define EACCESS(path, mode)	access(path, mode)
+ #else
+ #  define EACCESS(path, mode)	test_eaccess(path, mode)
+diff -urN old/bash-3.1/variables.c new/bash-3.1/variables.c
+--- old/bash-3.1/variables.c	2010-10-23 11:06:41 +0000
++++ new/bash-3.1/variables.c	2010-10-23 11:37:31 +0000
+@@ -1946,6 +1946,20 @@
+   SHELL_VAR *v;
+   VAR_CONTEXT *vc;
+ 
++#if defined (__MSYS__)
++  /* Remove trailing \r from value */
++  {
++    char *tpos;
++    if (value && *value)
++    {
++      tpos = strchr (value, '\0');
++      tpos--;
++      if (*tpos == '\r')
++	*tpos = '\0';
++    }
++  }
++#endif
++
+   if (shell_variables == 0)
+     {
+       shell_variables = global_variables = new_var_context ((char *)NULL, 0);
+@@ -3757,7 +3771,7 @@
+   { "HISTTIMEFORMAT", sv_histtimefmt },
+ #endif
+ 
+-#if defined (__CYGWIN__)
++#if defined (__CYGWIN__) && !defined (__MSYS__) /* I DO NOT WANT THIS */
+   { "HOME", sv_home },
+ #endif
+ 
+@@ -3986,7 +4000,7 @@
+ 
+ /* Update the value of HOME in the export environment so tilde expansion will
+    work on cygwin. */
+-#if defined (__CYGWIN__)
++#if defined (__CYGWIN__) && !defined (__MSYS__) /* I DO NOT WANT THIS */
+ sv_home (name)
+      char *name;
+ {
+diff -urN old/bash-3.1/y.tab.c new/bash-3.1/y.tab.c
+--- old/bash-3.1/y.tab.c	2010-10-23 11:06:41 +0000
++++ new/bash-3.1/y.tab.c	2010-10-23 11:00:03 +0000
+@@ -2477,7 +2477,13 @@
+ static int
+ yy_getc ()
+ {
++#ifdef __MSYS__
++  int c;
++  while ((c = (*(bash_input.getter)) ()) == '\r');
++  return c;
++#else
+   return (*(bash_input.getter)) ();
++#endif
+ }
+ 
+ /* Call this to unget C.  That is, to make C the next character
+@@ -3281,6 +3287,10 @@
+ 
+ 	  RESIZE_MALLOCED_BUFFER (shell_input_line, i, 2, shell_input_line_size, 256);
+ 
++#ifdef __MSYS__
++	  if (c == '\r')
++	    continue;
++#endif
+ 	  if (c == EOF)
+ 	    {
+ 	      if (bash_input.type == st_stream)

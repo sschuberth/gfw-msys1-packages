@@ -17,7 +17,9 @@ PATCH_URI="0001-Tweak-msys_p2w-for-msysgit.patch
            0011-stat-lstat-drop-sub-directory-counting-for-directori.patch
            0012-fix-parallel-make-MinGW-bug-1950-1.patch
            0013-msys.dll-basic-Unicode-support.patch
-           0014-FindFirstFile-FindNextFile-return-correct-file-attri.patch"
+           0014-FindFirstFile-FindNextFile-return-correct-file-attri.patch
+           0015-msys.dll-support-Unicode-console-input.patch
+           0016-msys.dll-support-ALT-NUMPAD-console-input.patch"
 
 PKG_COMPTYPES="bin ext dev doc lic"
 PKG_CONTENTS[0]="bin/msys-1.0.dll

@@ -1,4 +1,0 @@
-The patch from [1] has already been applied upstream at [2].
-
-[1] https://github.com/msysgit/msysgit/blob/msys/src/rt/patches/0010-quote-paths-for-non-msys-programs-that-contain-wildc.patch
-[2] http://sourceforge.net/p/mingw/msys-runtime/ci/7c538eb2c00bf1633edf62a176e0357196191b19/

@@ -1,4 +1,0 @@
-The patch from [1] does not apply here as it patches bash, not the msys runtime. It has been proposed for upstream at [2].
-
-[1] https://github.com/msysgit/msysgit/blob/msys/src/rt/patches/0012-bash-Don-t-load-user32.dll-for-every-shell-process.patch
-[2] http://sourceforge.net/p/mingw/bugs/1824/

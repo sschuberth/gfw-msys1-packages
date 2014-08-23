@@ -1,0 +1,37 @@
+From 428498ab8db7a4b7c2b12c066a821e69009c4e02 Mon Sep 17 00:00:00 2001
+From: Karsten Blees <blees@dcon.de>
+Date: Sat, 23 Aug 2014 15:26:32 +0200
+Subject: [PATCH] path.cc: return canonical posix path for ambiguous mount
+ entries
+
+When looking up a posix path for a windows path, and the windows path is
+mounted to multiple posix paths, return the canonical (i.e. shortest)
+posix path instead of the longest.
+
+E.g. when starting a shell in the root directory (i.e. the parent dir of
+msys.dll), the posix path should be '/', not '/usr' or '/usr/local'.
+
+This broke in 1.0.16 ("Be more robust when dealing with ambiguous paths
+and mount points").
+
+Signed-off-by: Karsten Blees <blees@dcon.de>
+---
+ winsup/cygwin/path.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/winsup/cygwin/path.cc b/winsup/cygwin/path.cc
+index 8596db0..5f0858b 100644
+--- a/winsup/cygwin/path.cc
++++ b/winsup/cygwin/path.cc
+@@ -2017,7 +2017,7 @@ sort_by_native_name (const void *a, const void *b)
+         }
+       else
+         /* All things being equal, sort by POSIX path */
+-        return sort_by_posix_name (a, b);
++        return strcmp (ap->posix_path, bp->posix_path);
+     }
+ 
+   return res;
+-- 
+2.1.0.msysgit.0
+

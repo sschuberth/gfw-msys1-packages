@@ -1,0 +1,50 @@
+From 53747a7c6f303b84bda3c14931ac25199cffb900 Mon Sep 17 00:00:00 2001
+From: Karsten Blees <blees@dcon.de>
+Date: Wed, 20 Aug 2014 21:03:27 +0200
+Subject: [PATCH] FindFirstFile/FindNextFile: return correct file attributes
+
+The unicode wrappers of FindFirstFile / FindNextFile only fill the file
+name fields of the WIN32_FIND_DATA structure, the other fields (e.g.
+dwFileAttributes) are essentially random.
+
+Copy the other fields from the Find*FileW results.
+
+Signed-off-by: Karsten Blees <blees@dcon.de>
+---
+ winsup/cygwin/unicode.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/winsup/cygwin/unicode.c b/winsup/cygwin/unicode.c
+index 2b4f585..bcceb27 100644
+--- a/winsup/cygwin/unicode.c
++++ b/winsup/cygwin/unicode.c
+@@ -6,6 +6,10 @@
+ #include <windows.h>
+ #include <wchar.h>
+ 
++#ifndef offsetof
++#define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
++#endif
++
+ #define A(n) LPCSTR a##n
+ #define W(n) LPWSTR w##n = NULL;
+ 
+@@ -142,6 +146,7 @@ HANDLE WINAPI FindFirstFileA(LPCSTR a1, LPWIN32_FIND_DATAA a2)
+ 	r = FindFirstFileW(w1, &w2);
+ 	if (r == INVALID_HANDLE_VALUE)
+ 		return r;
++	memcpy(a2, &w2, offsetof(WIN32_FIND_DATAA, cFileName));
+ 	if (wcstoutf(a2->cFileName, w2.cFileName, MAX_PATH) < 0 || wcstoutf(
+ 			a2->cAlternateFileName, w2.cAlternateFileName, MAX_PATH) < 0) {
+ 		FindClose(r);
+@@ -155,6 +160,7 @@ BOOL WINAPI FindNextFileA(HANDLE x1, LPWIN32_FIND_DATAA a2)
+ 	WIN32_FIND_DATAW w2;
+ 	if (!FindNextFileW(x1, &w2))
+ 		return FALSE;
++	memcpy(a2, &w2, offsetof(WIN32_FIND_DATAA, cFileName));
+ 	if (wcstoutf(a2->cFileName, w2.cFileName, MAX_PATH) < 0 || wcstoutf(
+ 			a2->cAlternateFileName, w2.cAlternateFileName, MAX_PATH) < 0)
+ 		return FALSE;
+-- 
+2.1.0.msysgit.0
+

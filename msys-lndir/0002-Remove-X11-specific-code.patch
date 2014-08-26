@@ -1,15 +1,16 @@
-From 85ff8d15ce05a00920e8861e9d046eacd7cefb73 Mon Sep 17 00:00:00 2001
+From 5ee3f14b55c085608fae813ac57c0b9c911610d7 Mon Sep 17 00:00:00 2001
 From: Karsten Blees <blees@dcon.de>
 Date: Thu, 21 Aug 2014 15:43:55 +0200
-Subject: [PATCH] de-X-ify lndir.c
+Subject: [PATCH 2/3] Remove X11 specific code
 
 Signed-off-by: Karsten Blees <blees@dcon.de>
+Signed-off-by: Sebastian Schuberth <sschuberth@gmail.com>
 ---
- lndir.c | 8 +++-----
- 1 file changed, 3 insertions(+), 5 deletions(-)
+ lndir.c | 10 ++++------
+ 1 file changed, 4 insertions(+), 6 deletions(-)
 
 diff --git a/lndir.c b/lndir.c
-index 6a8d950..7dc7e46 100644
+index 22fedd7..372834d 100644
 --- a/lndir.c
 +++ b/lndir.c
 @@ -49,8 +49,6 @@ in this Software without prior written authorization from The Open Group.
@@ -25,12 +26,21 @@ index 6a8d950..7dc7e46 100644
  char *rcurdir;
  char *curdir;
  
+-static void _X_NORETURN
++static void
+ help (FILE* f, char * prog_name, int code)
+ {
+     fprintf(f, "lndir (X.org version 6.8.1.0)\n");
+@@ -93,7 +91,7 @@ help (FILE* f, char * prog_name, int code)
+     exit (code);
+ }
+ 
 -static void _X_ATTRIBUTE_PRINTF(2,3) _X_NORETURN
 +static void
  quit (int code, const char * fmt, ...)
  {
      va_list args;
-@@ -83,14 +81,14 @@ quit (int code, const char * fmt, ...)
+@@ -104,14 +102,14 @@ quit (int code, const char * fmt, ...)
      exit (code);
  }
  
@@ -48,5 +58,5 @@ index 6a8d950..7dc7e46 100644
  {
      va_list args;
 -- 
-2.1.0.msysgit.0
+1.9.4.msysgit.1
 

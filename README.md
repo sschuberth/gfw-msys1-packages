@@ -2,7 +2,9 @@
 
 This is [mingwGitDevEnv-packages](https://github.com/sschuberth/mingwGitDevEnv-packages), the project providing the mingw-get packages for [mingwGitDevEnv](https://github.com/sschuberth/mingwGitDevEnv).
 
-## Git configuration for LZMA (de-)compression
+## Git configuration
+
+### LZMA (de-)compression
 
 For convenience, the _*.xml.lzma_ files are supposed to be (de-)compressed on-the-fly when checked out / in. To make this work you have to add the following diff and smudge / clean filters to your Git config file:
 
@@ -14,6 +16,10 @@ For convenience, the _*.xml.lzma_ files are supposed to be (de-)compressed on-th
     	required
 
 If you let the mingwGitDevEnv installer clone the packages repository this is already done for you. Otherwise you may want to use the _config.template_ file.
+
+### Updating the issue date
+
+Install the pre-commit hook from _pre-commit.template_ to get the issue date for package files automatically updated if you commit changes to such files.
 
 # Getting involved
 

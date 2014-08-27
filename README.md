@@ -9,8 +9,9 @@ For convenience, the _*.xml.lzma_ files are supposed to be (de-)compressed on-th
     [diff "lzma"]
     	textconv = lzma -d -c -qq | cat
     [filter "lzma"]
-    	smudge = lzma -d
     	clean = lzma -z
+    	smudge = lzma -d
+    	required
 
 If you let the mingwGitDevEnv installer clone the packages repository this is already done for you.
 

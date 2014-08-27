@@ -1,0 +1,6 @@
+[diff "lzma"]
+	textconv = lzma -d -c -qq | cat
+[filter "lzma"]
+	clean = lzma -z
+	smudge = lzma -d
+	required

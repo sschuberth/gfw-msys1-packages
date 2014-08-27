@@ -13,7 +13,7 @@ For convenience, the _*.xml.lzma_ files are supposed to be (de-)compressed on-th
     	smudge = lzma -d
     	required
 
-If you let the mingwGitDevEnv installer clone the packages repository this is already done for you.
+If you let the mingwGitDevEnv installer clone the packages repository this is already done for you. Otherwise you may want to use the _config.template_ file.
 
 # Getting involved
 

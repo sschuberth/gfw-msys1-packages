@@ -30,8 +30,6 @@ PKG_CONTENTS[0]="bin/msys-1.0.dll
                  bin/error-mode.exe
                  bin/kill.exe
                  etc/fstab.sample
-                 etc/inputrc.default
-                 etc/profile
                  m.ico
                  msys.ico"
 PKG_CONTENTS[1]="bin/cls

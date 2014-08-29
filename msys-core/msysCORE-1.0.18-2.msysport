@@ -21,7 +21,8 @@ PATCH_URI="0001-Tweak-msys_p2w-for-msysgit.patch
            0015-msys.dll-support-Unicode-console-input.patch
            0016-msys.dll-support-ALT-NUMPAD-console-input.patch
            0017-msys.dll-backport-multibyte-support-functions-from-n.patch
-           0018-path.cc-return-canonical-posix-path-for-ambiguous-mo.patch"
+           0018-path.cc-return-canonical-posix-path-for-ambiguous-mo.patch
+           0019-msys.dll-console-allow-non-ASCII-characters-in-the-w.patch"
 
 PKG_COMPTYPES="bin ext dev doc lic"
 PKG_CONTENTS[0]="bin/msys-1.0.dll

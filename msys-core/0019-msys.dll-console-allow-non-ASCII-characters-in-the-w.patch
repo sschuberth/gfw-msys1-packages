@@ -1,0 +1,33 @@
+From ac1bb6261e57e114fde366bac07d0abcfc4f78f3 Mon Sep 17 00:00:00 2001
+From: Karsten Blees <blees@dcon.de>
+Date: Fri, 29 Aug 2014 21:03:52 +0200
+Subject: [PATCH] msys.dll console: allow non-ASCII characters in the window
+ title
+
+MSYS console emulation allows to set the window title of the console window
+via 'OSC 2; title BEL' escape sequence. Unfortunately, this doesn't accept
+non-ASCII characters for no apparent reason.
+
+Drop the special filter for characters >= 127.
+
+Signed-off-by: Karsten Blees <blees@dcon.de>
+---
+ winsup/cygwin/fhandler_console.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/winsup/cygwin/fhandler_console.cc b/winsup/cygwin/fhandler_console.cc
+index bfce526..7a81ff4 100644
+--- a/winsup/cygwin/fhandler_console.cc
++++ b/winsup/cygwin/fhandler_console.cc
+@@ -1668,7 +1668,7 @@ fhandler_console::write (const void *vsrc, size_t len)
+ 	case gettitle:
+ 	  {
+ 	    int n = strlen (my_title_buf);
+-	    if (*src < ' ' || *src >= '\177')
++	    if (*src < ' ')
+ 	      {
+ 		if (*src == '\007' && state_ == gettitle)
+ 		  {
+-- 
+2.1.0.msysgit.0
+

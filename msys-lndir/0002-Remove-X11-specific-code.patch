@@ -30,7 +30,7 @@ index 22fedd7..372834d 100644
 +static void
  help (FILE* f, char * prog_name, int code)
  {
-     fprintf(f, "lndir (X.org version 6.8.1.0)\n");
+     fprintf(f, "lndir\n");
 @@ -93,7 +91,7 @@ help (FILE* f, char * prog_name, int code)
      exit (code);
  }

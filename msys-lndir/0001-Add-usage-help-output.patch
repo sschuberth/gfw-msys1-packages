@@ -22,7 +22,7 @@ index 6a8d950..22fedd7 100644
 +static void _X_NORETURN
 +help (FILE* f, char * prog_name, int code)
 +{
-+    fprintf(f, "lndir (X.org version 6.8.1.0)\n");
++    fprintf(f, "lndir\n");
 +    fprintf(f, "   Creates a shadow directory of symbolic links to another directory tree.\n\n");
 +    fprintf(f, "Usage: %s [OPTION...] fromdir [todir]\n\n", prog_name);
 +    fprintf(f, "Options:\n");

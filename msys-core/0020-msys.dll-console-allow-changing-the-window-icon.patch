@@ -1,0 +1,46 @@
+From e7d27850a146f1e80e7b2380662bed451a3f7ea5 Mon Sep 17 00:00:00 2001
+From: Karsten Blees <blees@dcon.de>
+Date: Fri, 29 Aug 2014 21:14:03 +0200
+Subject: [PATCH] msys.dll console: allow changing the window icon
+
+Allow changing the icon of the console window via escape sequence
+'OSC 1; iconfile BEL' (similar to XTerm).
+
+Example: echo -ne "\033]1;/etc/myicon.ico\007"
+
+Signed-off-by: Karsten Blees <blees@dcon.de>
+---
+ winsup/cygwin/fhandler_console.cc | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/winsup/cygwin/fhandler_console.cc b/winsup/cygwin/fhandler_console.cc
+index 7a81ff4..4a586f7 100644
+--- a/winsup/cygwin/fhandler_console.cc
++++ b/winsup/cygwin/fhandler_console.cc
+@@ -31,6 +31,7 @@ details. */
+ #include "pinfo.h"
+ #include "shared_info.h"
+ #include "unicode.h"
++#include "path.h"
+ 
+ #define CONVERT_LIMIT 4096
+ 
+@@ -1676,6 +1677,15 @@ fhandler_console::write (const void *vsrc, size_t len)
+ 		      strcpy (old_title, my_title_buf);
+ 		    set_console_title (my_title_buf);
+ 		  }
++		else if (*src == '\007' && rarg == 1)
++		{
++		  path_conv path (my_title_buf);
++		  HANDLE icon = LoadImage(NULL, path, IMAGE_ICON, 0, 0,
++		    LR_LOADFROMFILE | LR_DEFAULTSIZE | LR_SHARED);
++		  if (icon)
++		    SendMessage(GetConsoleWindow(), WM_SETICON,
++		      ICON_SMALL, (LPARAM) icon);
++		}
+ 		state_ = normal;
+ 	      }
+ 	    else if (n < TITLESIZE)
+-- 
+2.1.0.msysgit.0
+

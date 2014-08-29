@@ -11,13 +11,37 @@ lndir-1.0.1-2-msys.patch.
 Signed-off-by: Karsten Blees <blees@dcon.de>
 Signed-off-by: Sebastian Schuberth <sschuberth@gmail.com>
 ---
- lndir.c | 5 +++++
- 1 file changed, 5 insertions(+)
+ lndir.c | 15 ++++++++++-----
+ 1 file changed, 10 insertions(+), 5 deletions(-)
 
 diff --git a/lndir.c b/lndir.c
 index 372834d..bced56c 100644
 --- a/lndir.c
 +++ b/lndir.c
+@@ -74,18 +74,18 @@ static void
+ help (FILE* f, char * prog_name, int code)
+ {
+     fprintf(f, "lndir\n");
+-    fprintf(f, "   Creates a shadow directory of symbolic links to another directory tree.\n\n");
++    fprintf(f, "   Creates a shadow directory of hardlinks to another directory tree.\n\n");
+     fprintf(f, "Usage: %s [OPTION...] fromdir [todir]\n\n", prog_name);
+     fprintf(f, "Options:\n");
+     fprintf(f, "  -silent        Do not print name of each subdirectory traversed\n");
+-    fprintf(f, "  -ignorelinks   Do not treat symlinks differently from regular files\n");
+-    fprintf(f, "  -withrevinfo   Symlink contents of source control directories (CVS, .svn, ...)\n");
++    fprintf(f, "  -ignorelinks   Do not treat hardlinks differently from regular files\n");
++    fprintf(f, "  -withrevinfo   Hardlink contents of source control directories (CVS, .svn, ...)\n");
+     fprintf(f, "  -h, -?, -help  Show this help message.\n\n");
+     fprintf(f, "Other arguments:\n");
+-    fprintf(f, "  fromdir        The directory whose contents should be symlinked.\n");
++    fprintf(f, "  fromdir        The directory whose contents should be hardlinked.\n");
+     fprintf(f, "                 If a relative path, it should be specified from the perspective\n");
+     fprintf(f, "                 of inside the [todir] directory.\n");
+-    fprintf(f, "  todir          Optionally, the directory in which the symlinks to the contents\n");
++    fprintf(f, "  todir          Optionally, the directory in which the hardlinks to the contents\n");
+     fprintf(f, "                 of fromdir will be created.  Defaults to '.'\n");
+ 
+     exit (code);
 @@ -335,8 +335,13 @@ dodir (const char *fn,		/* name of "from" directory, either absolute or
  	    }
  	    else

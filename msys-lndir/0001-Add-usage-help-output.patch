@@ -27,7 +27,7 @@ index 6a8d950..22fedd7 100644
 +    fprintf(f, "Usage: %s [OPTION...] fromdir [todir]\n\n", prog_name);
 +    fprintf(f, "Options:\n");
 +    fprintf(f, "  -silent        Do not print name of each subdirectory traversed\n");
-+    fprintf(f, "  -ignorelinks   Do not treak symlinks differerntly from regular files\n");
++    fprintf(f, "  -ignorelinks   Do not treat symlinks differently from regular files\n");
 +    fprintf(f, "  -withrevinfo   Symlink contents of source control directories (CVS, .svn, ...)\n");
 +    fprintf(f, "  -h, -?, -help  Show this help message.\n\n");
 +    fprintf(f, "Other arguments:\n");

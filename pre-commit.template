@@ -9,7 +9,7 @@ fi
 
 for file in $(git diff --cached --name-only --diff-filter=AM -z $against); do
     if [[ "$file" == *.xml.lzma ]]; then
-        issue=$(sed -nr 's/<software-distribution.*issue="([0-9]{10})">/\1/p' "$file")
+        issue=$(sed -nr 's/.* issue="([0-9]{10})">/\1/p' "$file")
         date=${issue:0:8}
         rev=${issue:8:2}
 
@@ -21,7 +21,7 @@ for file in $(git diff --cached --name-only --diff-filter=AM -z $against); do
             rev="00"
         fi
 
-        sed -i -r "s/(<software-distribution.*issue=\")[0-9]{10}(\">)/\1${today}${rev: -2}\2/" "$file"
+        sed -i -r "s/(.* issue=\")[0-9]{10}(\">)/\1${today}${rev: -2}\2/" "$file"
         git add "$file"
     fi
 done

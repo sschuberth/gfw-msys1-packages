@@ -46,7 +46,9 @@ PATCH_URI="01-mingw32-initial.mingw32.patch
            openssl-1.0.0e-enginesdir-install.all.patch"
 
 src_compile() {
+  # Mirror the source into the build directory.
   lndirs
+
   cd ${B}
   ./config ${CONF_ARGS}
   mgwmake

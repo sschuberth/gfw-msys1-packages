@@ -15,9 +15,10 @@ PKG_CONTENTS[3]="include lib/*.a"
 PKG_CONTENTS[4]="bin/*.dll bin/*.crt"
 
 src_compile() {
+  # Mirror the source into the build directory.
   lndirs
-  cd ${B}
 
+  cd ${B}
   CFG="-ipv6 -zlib -sspi -ssl -spnego -ldaps" \
   OPENSSL_PATH=/mingw \
   OPENSSL_LIBPATH=/mingw/lib \

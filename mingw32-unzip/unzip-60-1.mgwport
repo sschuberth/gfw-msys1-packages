@@ -14,7 +14,9 @@ PKG_CONTENTS[1]="share/doc
 PKG_CONTENTS[2]="share/doc/${PN}/${PV}/LICENSE"
 
 src_compile() {
+  # Mirror the source into the build directory.
   lndirs
+
   cd ${B}
   make -f win32/Makefile.gcc
 }

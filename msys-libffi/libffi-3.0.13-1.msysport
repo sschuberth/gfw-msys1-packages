@@ -20,17 +20,8 @@ PATCH_URI="0001-msysize.msys2.patch
            3.0.12-cygwin.msys2.patch
            remove-unknown-gas-statements.patch"
 
-src_compile() {
-  cd ${S}
-  mgwautoreconf
-  cd ${B}
-  mgwconf
-  mgwmake
-}
-
 src_install() {
   cd ${B}
   mgwinstall
   mv ${B}/../inst/usr/lib/libffi-*/include ${B}/../inst/usr
 }
-

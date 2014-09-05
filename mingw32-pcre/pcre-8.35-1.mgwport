@@ -41,8 +41,3 @@ src_test() {
   cd ${B}
   mgwmake test
 }
-
-src_install() {
-  cd ${B}
-  mgwinstall
-}

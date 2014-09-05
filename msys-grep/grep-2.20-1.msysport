@@ -31,8 +31,3 @@ src_test() {
   cd ${B}
   mgwmake check-expensive
 }
-
-src_install() {
-  cd ${B}
-  mgwinstall
-}

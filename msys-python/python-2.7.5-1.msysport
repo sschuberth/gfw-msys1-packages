@@ -61,8 +61,3 @@ src_test() {
   # Disabled as it hangs at "test_imaplib".
   #mgwmake testall
 }
-
-src_install() {
-  cd ${B}
-  mgwinstall 
-}

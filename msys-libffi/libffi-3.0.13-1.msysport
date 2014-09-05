@@ -28,11 +28,6 @@ src_compile() {
   mgwmake
 }
 
-src_test() {
-  cd ${B}
-  mgwmake check
-}
-
 src_install() {
   cd ${B}
   mgwinstall

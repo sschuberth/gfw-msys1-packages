@@ -36,8 +36,3 @@ src_compile() {
   mgwconf
   mgwmake
 }
-
-src_test() {
-  cd ${B}
-  mgwmake test
-}

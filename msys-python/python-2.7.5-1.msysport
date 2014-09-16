@@ -32,7 +32,8 @@ PATCH_URI="0001-2.5.2-ctypes-util-find_library.msys2.patch
            0018-symlink-creation-order.msys2.patch
            0019-make-_PyNode_SizeOf-public.msys2.patch
            0023-increase-max-db-ver.msys2.patch
-           add-round-function.patch"
+           add-round-function.patch
+           fix-lib-directory.patch"
 
 src_compile() {
   cd ${S}

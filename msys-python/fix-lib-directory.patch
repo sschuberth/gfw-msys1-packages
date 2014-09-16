@@ -1,0 +1,17 @@
+--- python-2.7.5-1/origsrc/Python-2.7.5/Makefile.pre.in	2014-09-04 18:04:58.000000000 +0200
++++ python-2.7.5-1/src/Python-2.7.5/Makefile.pre.in	2014-09-15 21:53:35.000000000 +0200
+@@ -1079,13 +1079,13 @@
+ 		else	true; \
+ 		fi; \
+ 	done
+ 	@if test -d $(LIBRARY); then :; else \
+ 		if test "$(PYTHONFRAMEWORKDIR)" = no-framework; then \
+ 			if test "$(SO)" = .dll; then \
+-				$(INSTALL_DATA) $(LDLIBRARY) $(DESTDIR)$(LIBPL) ; \
++				$(INSTALL_DATA) $(LDLIBRARY) $(DESTDIR)$(LIBDIR) ; \
+ 			else \
+ 				$(INSTALL_DATA) $(LIBRARY) $(DESTDIR)$(LIBPL)/$(LIBRARY) ; \
+ 				$(RANLIB) $(DESTDIR)$(LIBPL)/$(LIBRARY) ; \
+ 			fi; \
+ 		else \
+ 			echo Skip install of $(LIBRARY) - use make frameworkinstall; \

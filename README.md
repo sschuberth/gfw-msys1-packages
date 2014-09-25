@@ -41,4 +41,4 @@ If you want to create a new package for use with mingw-get the following steps a
 
 ## Getting in contact
 
-We now have a [mailing list](https://groups.google.com/group/git-windows-sdk) for developers.
+We now have a [mailing list](https://groups.google.com/group/git-win-sdk) for developers.

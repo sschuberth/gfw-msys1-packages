@@ -6,7 +6,8 @@ HOMEPAGE="http://www.gnu.org/software/gzip/"
 SRC_URI="http://ftpmirror.gnu.org/${PN}/${PN}-${PV}.tar.xz
          http://ftpmirror.gnu.org/${PN}/${PN}-${PV}.tar.xz.sig"
 
-PATCH_URI="use-less-instead-of-more.patch"
+PATCH_URI="use-less-instead-of-more.patch
+           use-binary-mode.patch"
 
 PKG_COMPTYPES="bin doc lic"
 

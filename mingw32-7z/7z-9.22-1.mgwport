@@ -1,0 +1,46 @@
+DESCRIPTION="7-Zip is a file archiver with a high compression ratio."
+HOMEPAGE="http://7-zip.org/"
+
+SRC_URI="mirror://sourceforge/project/sevenzip/7-Zip/${PV}/${PN}${PV[1]}${PV[2]}.tar.bz2"
+SRC_DIR="."
+
+PKG_COMPTYPES="bin doc lic"
+
+PKG_CONTENTS[0]="bin"
+PKG_CONTENTS[1]="share/doc
+                 --exclude share/doc/${PN}/${PV}/License.txt
+                 --exclude share/doc/${PN}/${PV}/unRarLicense.txt"
+PKG_CONTENTS[2]="share/doc/${PN}/${PV}/*License.txt"
+
+PATCH_URI="0001-Fix-path-in-GCC-Makefile.patch
+           0002-Allow-modern-GCC-to-compile-7zMain.c.patch
+           0003-Fix-compilation-with-MinGW.patch
+           0004-Allow-disabling-.asm.patch
+           0005-Provide-a-g-compatible-Makefile-to-build-7za.exe.patch"
+
+src_compile() {
+  # Mirror the source into the build directory.
+  lndirs
+
+  cd ${B}/CPP/7zip/Bundles/Alone
+  make -f makefile.gcc
+}
+
+src_test() {
+  cd ${B}/CPP/7zip/Bundles/Alone
+  rm -rf abc
+  mkdir abc &&
+  echo Hello > abc/README &&
+  ./7za.exe a test.7z abc/ &&
+  rm -r abc &&
+  ./7za.exe x test.7z &&
+  [ README = "$(cat abc/README)" ]
+}
+
+src_install() {
+  cd ${B}/CPP/7zip/Bundles/Alone
+  dobin 7za.exe
+
+  cd ${B}/DOC
+  dodoc readme.txt License.txt unRarLicense.txt
+}

@@ -1,0 +1,26 @@
+From c7b671b0290dbd547987d046b2a3030a7b8fda2a Mon Sep 17 00:00:00 2001
+From: Johannes Schindelin <johannes.schindelin@gmx.de>
+Date: Thu, 9 Oct 2014 14:00:47 +0000
+Subject: [PATCH 2/5] Allow modern GCC to compile 7zMain.c
+
+Signed-off-by: Johannes Schindelin <johannes.schindelin@gmx.de>
+---
+ C/Util/7z/makefile.gcc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/C/Util/7z/makefile.gcc b/C/Util/7z/makefile.gcc
+index 90b0722..412a348 100644
+--- a/C/Util/7z/makefile.gcc
++++ b/C/Util/7z/makefile.gcc
+@@ -2,7 +2,7 @@ PROG = 7zDec
+ CXX = g++
+ LIB =
+ RM = rm -f
+-CFLAGS = -c -O2 -Wall
++CFLAGS = -c -O2 -Wall -fpermissive
+ 
+ OBJS = 7zMain.o 7zAlloc.o 7zBuf.o 7zBuf2.o 7zCrc.o 7zCrcOpt.o 7zDec.o 7zIn.o CpuArch.o LzmaDec.o Lzma2Dec.o Bra.o Bra86.o Bcj2.o Ppmd7.o Ppmd7Dec.o 7zFile.o 7zStream.o
+ 
+-- 
+1.9.2.msysgit.0.2291.g3c2874a.dirty
+

@@ -1,0 +1,82 @@
+From e9db8ffa1f62af51522fe44a0f4e8a651fb515de Mon Sep 17 00:00:00 2001
+From: Johannes Schindelin <johannes.schindelin@gmx.de>
+Date: Thu, 9 Oct 2014 14:01:23 +0000
+Subject: [PATCH 3/5] Fix compilation with MinGW
+
+Signed-off-by: Johannes Schindelin <johannes.schindelin@gmx.de>
+---
+ C/XzDec.c             | 4 ++--
+ CPP/Common/C_FileIO.h | 2 +-
+ CPP/Common/MyVector.h | 1 +
+ CPP/Common/Random.cpp | 2 ++
+ CPP/Windows/FileIO.h  | 1 +
+ 5 files changed, 7 insertions(+), 3 deletions(-)
+
+diff --git a/C/XzDec.c b/C/XzDec.c
+index fe859bf..ea1014d 100644
+--- a/C/XzDec.c
++++ b/C/XzDec.c
+@@ -304,8 +304,8 @@ static SRes Lzma2State_Code(void *pp, Byte *dest, SizeT *destLen, const Byte *sr
+     int srcWasFinished, ECoderFinishMode finishMode, int *wasFinished)
+ {
+   ELzmaStatus status;
+-  /* ELzmaFinishMode fm = (finishMode == LZMA_FINISH_ANY) ? LZMA_FINISH_ANY : LZMA_FINISH_END; */
+-  SRes res = Lzma2Dec_DecodeToBuf((CLzma2Dec *)pp, dest, destLen, src, srcLen, finishMode, &status);
++  ELzmaFinishMode fm = (finishMode == LZMA_FINISH_ANY) ? LZMA_FINISH_ANY : LZMA_FINISH_END;
++  SRes res = Lzma2Dec_DecodeToBuf((CLzma2Dec *)pp, dest, destLen, src, srcLen, fm, &status);
+   srcWasFinished = srcWasFinished;
+   *wasFinished = (status == LZMA_STATUS_FINISHED_WITH_MARK);
+   return res;
+diff --git a/CPP/Common/C_FileIO.h b/CPP/Common/C_FileIO.h
+index f314044..4677983 100644
+--- a/CPP/Common/C_FileIO.h
++++ b/CPP/Common/C_FileIO.h
+@@ -9,7 +9,7 @@
+ #include "Types.h"
+ #include "MyWindows.h"
+ 
+-#ifdef _WIN32
++#if defined(_WIN32) && !defined(__MINGW32__)
+ typedef size_t ssize_t;
+ #endif
+ 
+diff --git a/CPP/Common/MyVector.h b/CPP/Common/MyVector.h
+index 24740dc..3eded00 100644
+--- a/CPP/Common/MyVector.h
++++ b/CPP/Common/MyVector.h
+@@ -4,6 +4,7 @@
+ #define __COMMON_VECTOR_H
+ 
+ #include "Defs.h"
++#include <stdlib.h>
+ 
+ class CBaseRecordVector
+ {
+diff --git a/CPP/Common/Random.cpp b/CPP/Common/Random.cpp
+index ca0113f..401dfec 100644
+--- a/CPP/Common/Random.cpp
++++ b/CPP/Common/Random.cpp
+@@ -6,6 +6,8 @@
+ 
+ #ifndef _WIN32
+ #include <time.h>
++#else
++#include <windows.h>
+ #endif
+ 
+ #include "Random.h"
+diff --git a/CPP/Windows/FileIO.h b/CPP/Windows/FileIO.h
+index ebfa71f..2c43df4 100644
+--- a/CPP/Windows/FileIO.h
++++ b/CPP/Windows/FileIO.h
+@@ -7,6 +7,7 @@
+ #include "../Common/MyString.h"
+ 
+ #include "Defs.h"
++#include <winioctl.h>
+ 
+ namespace NWindows {
+ namespace NFile {
+-- 
+1.9.2.msysgit.0.2291.g3c2874a.dirty
+

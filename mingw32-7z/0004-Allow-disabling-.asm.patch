@@ -1,0 +1,28 @@
+From 9d2bfb78b17e02e6b72fe4a188609ed4ae0fba9f Mon Sep 17 00:00:00 2001
+From: Johannes Schindelin <johannes.schindelin@gmx.de>
+Date: Thu, 9 Oct 2014 14:47:47 +0000
+Subject: [PATCH 4/5] Allow disabling .asm
+
+The .asm sources cannot be handled by GNU's compiler.
+
+Signed-off-by: Johannes Schindelin <johannes.schindelin@gmx.de>
+---
+ C/Aes.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/C/Aes.c b/C/Aes.c
+index c632fda..4989bef 100644
+--- a/C/Aes.c
++++ b/C/Aes.c
+@@ -83,7 +83,7 @@ void AesGenTables(void)
+   g_AesCbc_Encode = AesCbc_Encode;
+   g_AesCbc_Decode = AesCbc_Decode;
+   g_AesCtr_Code = AesCtr_Code;
+-  #ifdef MY_CPU_X86_OR_AMD64
++  #if !defined(NO_ASM_PLEASE) && defined(MY_CPU_X86_OR_AMD64)
+   if (CPU_Is_Aes_Supported())
+   {
+     g_AesCbc_Encode = AesCbc_Encode_Intel;
+-- 
+1.9.2.msysgit.0.2291.g3c2874a.dirty
+

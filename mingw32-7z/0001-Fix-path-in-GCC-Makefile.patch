@@ -1,0 +1,26 @@
+From 58f8135738495a9e86636e3711756fc6496c93bc Mon Sep 17 00:00:00 2001
+From: Johannes Schindelin <johannes.schindelin@gmx.de>
+Date: Thu, 9 Oct 2014 14:00:30 +0000
+Subject: [PATCH 1/5] Fix path in GCC Makefile
+
+Signed-off-by: Johannes Schindelin <johannes.schindelin@gmx.de>
+---
+ C/Util/7z/makefile.gcc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/C/Util/7z/makefile.gcc b/C/Util/7z/makefile.gcc
+index 2fb1576..90b0722 100644
+--- a/C/Util/7z/makefile.gcc
++++ b/C/Util/7z/makefile.gcc
+@@ -14,7 +14,7 @@ $(PROG): $(OBJS)
+ 7zMain.o: 7zMain.c
+ 	$(CXX) $(CFLAGS) 7zMain.c
+ 
+-7zAlloc.o: 7zAlloc.c
++7zAlloc.o: ../../7zAlloc.c
+ 	$(CXX) $(CFLAGS) ../../7zAlloc.c
+ 
+ 7zBuf.o: ../../7zBuf.c
+-- 
+1.9.2.msysgit.0.2291.g3c2874a.dirty
+

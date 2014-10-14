@@ -16,10 +16,14 @@ PKG_CONTENTS[0]="bin
                  usr"
 PKG_CONTENTS[1]="libexec/git-core/git-contacts
                  libexec/git-core/git-subtree
+                 share/doc/git-doc/git-subtree.txt
+                 share/doc/git-doc/git-subtree.html
                  share/git-core/git-completion.bash
                  share/git-core/git-prompt.sh"
 PKG_CONTENTS[2]="share/doc
-                 --exclude share/doc/${PN}/${PV}/COPYING"
+                 --exclude share/doc/${PN}/${PV}/COPYING
+                 --exclude share/doc/git-doc/git-subtree.txt
+                 --exclude share/doc/git-doc/git-subtree.html"
 PKG_CONTENTS[3]="share/doc/${PN}/${PV}/COPYING"
 
 src_compile() {
@@ -35,6 +39,9 @@ src_compile() {
   # value in GIT-VERSION-GEN.
   echo "${PV}-mingw-${PR}" > version
 
+  mgwmake all doc
+
+  cd contrib/subtree
   mgwmake all doc
 }
 
@@ -60,6 +67,10 @@ src_install() {
 
   # Remove the current directory from PATH so that the "INSTALL" text file is not being executed in favor of the "install" binary.
   (cd subtree && _MGWPORT_RESTRICT_native_prefix_=1 PATH=${PATH#.:} mgwinstall prefix=/mingw)
+
+  docinto /git-doc
+  dodoc subtree/git-subtree.html
+  dodoc subtree/git-subtree.txt
 
   exeinto /mingw/libexec/git-core
   doexe contacts/git-contacts

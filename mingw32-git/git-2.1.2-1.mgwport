@@ -1,7 +1,7 @@
 DESCRIPTION="Git distributed version control system"
 HOMEPAGE="http://git-scm.com/"
 
-SRC_URI="https://github.com/sschuberth/${PN}/archive/v${PV}-mingw-${PR}.tar.gz"
+SRC_URI="https://github.com/git-for-windows/${PN}/archive/v${PV}-mingw-${PR}.tar.gz"
 SRC_DIR="${P}-mingw-${PR}"
 
 PKG_COMPTYPES="bin ext doc lic"

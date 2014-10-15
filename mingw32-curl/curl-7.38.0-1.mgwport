@@ -39,11 +39,9 @@ src_install() {
   dobin src/curl.exe
 
   mv lib/ca-bundle.crt lib/curl-ca-bundle.crt 
-  insinto /mingw/bin
-  doins lib/curl-ca-bundle.crt
+  dobin lib/curl-ca-bundle.crt
   
-  insinto /mingw/include/curl
-  doins include/curl/*.h
+  doinclude include/curl/*.h
 
   dodoc docs/{FAQ,MANUAL,THANKS,TODO,curl.pdf,curl-config.pdf}
 }

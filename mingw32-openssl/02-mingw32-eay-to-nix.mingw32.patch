@@ -1,9 +1,36 @@
---- origsrc/openssl-1.0.1f/util/mkdef.pl	2014-01-06 13:47:42 +0000
-+++ src/openssl-1.0.1f/util/mkdef.pl	2014-02-01 17:02:31 +0000
-@@ -235,10 +235,12 @@ foreach (@ARGV, split(/ /, $options))
- 	elsif (/^no-jpake$/)	{ $no_jpake=1; }
+--- origsrc/openssl-1.0.1i/util/mkdef.pl	2014-08-06 21:10:56 +0000
++++ src/openssl-1.0.1i/util/mkdef.pl	2014-10-15 10:14:26 +0000
+@@ -33,7 +33,7 @@
+ #	existence:platform:kind:algorithms
+ #
+ # - "existence" can be "EXIST" or "NOEXIST" depending on if the symbol is
+-#   found somewhere in the source, 
++#   found somewhere in the source,
+ # - "platforms" is empty if it exists on all platforms, otherwise it contains
+ #   comma-separated list of the platform, just as they are if the symbol exists
+ #   for those platforms, or prepended with a "!" if not.  This helps resolve
+@@ -137,7 +137,7 @@ my $no_rsa; my $no_dsa; my $no_dh; my $n
+ my $no_ec; my $no_ecdsa; my $no_ecdh; my $no_engine; my $no_hw;
+ my $no_fp_api; my $no_static_engine=1; my $no_gmp; my $no_deprecated;
+ my $no_rfc3779; my $no_psk; my $no_tlsext; my $no_cms; my $no_capieng;
+-my $no_jpake; my $no_srp; my $no_ssl2; my $no_ec2m; my $no_nistp_gcc; 
++my $no_jpake; my $no_srp; my $no_ssl2; my $no_ec2m; my $no_nistp_gcc;
+ my $no_nextprotoneg; my $no_sctp;
+ my $no_unit_test;
+ 
+@@ -173,7 +173,7 @@ foreach (@ARGV, split(/ /, $options))
+ 
+ 	$do_ssl=1 if $_ eq "ssleay";
+ 	if ($_ eq "ssl") {
+-		$do_ssl=1; 
++		$do_ssl=1;
+ 		$libname=$_
+ 	}
+ 	$do_crypto=1 if $_ eq "libeay";
+@@ -239,10 +239,12 @@ foreach (@ARGV, split(/ /, $options))
  	elsif (/^no-srp$/)	{ $no_srp=1; }
  	elsif (/^no-sctp$/)	{ $no_sctp=1; }
+ 	elsif (/^no-unit-test$/){ $no_unit_test=1; }
 +
 +  if (/^--libname=(.+)/) { $libname=$1; }
  	}
@@ -14,7 +41,7 @@
  	if ($do_ssl) {
  		$libname="SSLEAY";
  	}
-@@ -343,36 +345,36 @@ $crypto.=" crypto/srp/srp.h";
+@@ -347,36 +349,36 @@ $crypto.=" crypto/srp/srp.h";
  
  my $symhacks="crypto/symhacks.h";
  
@@ -60,7 +87,7 @@
  
  } elsif ($do_checkexist) {
  	&check_existing(*ssl_list, @ssl_symbols)
-@@ -390,10 +392,10 @@ if($do_crypto == 1) {
+@@ -394,10 +396,10 @@ if($do_crypto == 1) {
  int main()
  {
  EOF
@@ -73,7 +100,7 @@
  		if $do_crypto == 1;
  
  	print "}\n";
-@@ -1282,11 +1284,7 @@ sub print_def_file
+@@ -1287,11 +1289,7 @@ sub print_def_file
  	my $what = "OpenSSL: implementation of Secure Socket Layer";
  	my $description = "$what $version, $name - http://$http_vendor";
  
@@ -86,7 +113,7 @@
  		{ # DLL names should not clash on the whole system.
  		  # However, they should not have any particular relationship
  		  # to the name of the static library.  Chose descriptive names
-@@ -1306,8 +1304,6 @@ EOO
+@@ -1311,8 +1309,6 @@ EOO
  ; Definition file for the DLL version of the $name library from OpenSSL
  ;
  

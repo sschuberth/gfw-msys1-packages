@@ -26,6 +26,8 @@ PKG_CONTENTS[0]="bin"
 PKG_CONTENTS[1]="--exclude share/doc/${PN}/${PV}/COPYING share/doc share/man/man1"
 PKG_CONTENTS[2]="share/doc/${PN}/${PV}/COPYING"
 
+DIFF_EXCLUDES="configure"
+
 src_compile() {
   cd ${S}
   autoconf --force
@@ -35,6 +37,9 @@ src_compile() {
 
   # Prepopulate the release level.
   expr $PR - 1 > .build || :
+
+  # Ensure y.tab.{c,h} is regenerated from parse.y.
+  touch parse.y
 
   # Parallel make builds version.h twice, which over-increments .build.
   mgwmake -j1

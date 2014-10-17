@@ -26,7 +26,7 @@ PKG_CONTENTS[4]="bin/*.dll lib/openssl${enginedir}"
 CONF_ARGS="--prefix=${D}${prefix} \
            --openssldir=${prefix}${openssldir} \
            --enginesdir=${prefix}/lib/openssl/${enginedir} \
-           enable-zlib-dynamic enable-threads enable-shared"
+           enable-zlib-dynamic enable-threads enable-shared no-ssl2 no-ssl3"
 
 PATCH_URI="01-mingw32-initial.mingw32.patch
            01-msys-initial.msys.patch
@@ -51,6 +51,7 @@ src_compile() {
 
   cd ${B}
   ./config ${CONF_ARGS}
+  mgwmake depend
   mgwmake
 }
 

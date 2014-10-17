@@ -28,6 +28,9 @@ PKG_CONTENTS[2]="share/doc/${PN}/${PV}/COPYING"
 
 DIFF_EXCLUDES="configure"
 
+# Parallel make builds version.h twice, which over-increments .build.
+MAKEOPTS="-j1"
+
 src_compile() {
   cd ${S}
   autoconf --force
@@ -41,14 +44,13 @@ src_compile() {
   # Ensure y.tab.{c,h} is regenerated from parse.y.
   touch parse.y
 
-  # Parallel make builds version.h twice, which over-increments .build.
-  mgwmake -j1
+  mgwmake
 
   # must compile y.tab.c at -O0
   rm -f .build
   rm -f y.tab.o
   expr $PR - 1 > .build || :
-  mgwmake -j1 CFLAGS="${CFLAGS} -O0"
+  mgwmake CFLAGS="${CFLAGS} -O0"
 }
 
 src_install() {

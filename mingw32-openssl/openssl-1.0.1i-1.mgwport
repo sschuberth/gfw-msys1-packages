@@ -56,10 +56,10 @@ src_compile() {
 
 src_test() {
   cd ${B}
-  make tests
+  mgwmake tests
 }
 
 src_install() {
   cd ${B}
-  make install MANDIR=${prefix}/share/man INSTALL_PREFIX=${D} MANSUFFIX=ssl
+  mgwmake install MANDIR=${prefix}/share/man INSTALL_PREFIX=${D} MANSUFFIX=ssl
 }

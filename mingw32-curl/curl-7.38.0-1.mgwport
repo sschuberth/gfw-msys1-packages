@@ -41,6 +41,7 @@ src_install() {
   mv lib/ca-bundle.crt lib/curl-ca-bundle.crt 
   dobin lib/curl-ca-bundle.crt
   
+  includeinto curl
   doinclude include/curl/*.h
 
   dodoc docs/{FAQ,MANUAL,THANKS,TODO,curl.pdf,curl-config.pdf}

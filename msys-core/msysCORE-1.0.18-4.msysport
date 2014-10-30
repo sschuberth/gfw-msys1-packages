@@ -7,7 +7,6 @@ SRC_DIR="source"
 PATCH_URI="0001-Tweak-msys_p2w-for-msysgit.patch
            0002-Tweak-p2w-for-msysgit-Do-not-touch-strings-containi.patch
            0003-p2w-for-msysgit-Check-if-string-starts-with-.-or.patch
-           0005-Temporary-workaround-use-strtol-instead-of-strtoll.patch
            0006-Ignore-the-tty-option-from-the-CYGWIN-environment-va.patch
            0007-only-override-the-variables-HOMEPATH-and-HOMEDRIVE-i.patch
            0008-Do-not-start-the-fstab-observer-thread.patch
@@ -29,7 +28,6 @@ PKG_CONTENTS[0]="bin/msys-1.0.dll
                  bin/msysmnt.exe
                  bin/ps.exe
                  bin/error-mode.exe
-                 bin/kill.exe
                  etc/fstab.sample
                  m.ico
                  msys.ico"

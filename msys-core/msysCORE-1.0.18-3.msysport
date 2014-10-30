@@ -28,7 +28,6 @@ PKG_CONTENTS[0]="bin/msys-1.0.dll
                  bin/msysmnt.exe
                  bin/ps.exe
                  bin/error-mode.exe
-                 bin/kill.exe
                  etc/fstab.sample
                  m.ico
                  msys.ico"

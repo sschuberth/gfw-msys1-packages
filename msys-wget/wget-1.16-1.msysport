@@ -1,0 +1,29 @@
+DESCRIPTION="GNU wget is a free software package for retrieving files using HTTP, HTTPS and FTP"
+SRC_URI="http://ftp.gnu.org/gnu/${PN}/${P}.tar.xz
+         http://ftp.gnu.org/gnu/${PN}/${P}.tar.xz.sig"
+
+#PKG_COMPTYPES="bin doc lic"
+#PKG_CONTENTS[0]="bin"
+#PKG_CONTENTS[1]="--exclude=share/doc/${PN}/${PV}/COPYING share/doc share/man"
+#PKG_CONTENTS[2]="share/doc/${PN}/${PV}/COPYING"
+
+#PATCH_URI="01-wget-1.12-1-msys.patch"
+
+src_compile() {
+  # Mirror the source into the build directory.
+  lndirs
+
+  cd ${B}
+  mgwconf --with-ssl=openssl
+  mgwmake
+}
+
+#src_install() {
+#  cd ${B}
+#  dobin lndir.exe
+
+#  cp ${S}/lndir.man lndir.1
+#  doman lndir.1
+
+#  dodoc COPYING ChangeLog README
+#}

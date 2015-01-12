@@ -10,6 +10,9 @@ fi
 for file in $(git diff --cached --name-only --diff-filter=AM $against); do
     [[ "$file" != *.xml.lzma ]] && continue
 
+    # Skip the check for a manually changed issue date when rebasing.
+    [ -d ".git/rebase-merge" -o -d ".git/rebase-apply" ] && continue
+
     # Only bump the issue date if it has not been changed manually.
     git diff --cached --word-diff=porcelain -- "$file" | grep -q "^\+issue=" && continue
 

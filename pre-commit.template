@@ -8,23 +8,23 @@ else
 fi
 
 for file in $(git diff --cached --name-only --diff-filter=AM $against); do
-    if [[ "$file" == *.xml.lzma ]]; then
-        # Only bump the issue date if it has not been changed manually.
-        if ! git diff --cached --word-diff=porcelain -- "$file" | grep -q "^\+issue="; then
-            issue=$(sed -nr 's/.* issue="([0-9]{10})">/\1/p' "$file")
-            date=${issue:0:8}
-            rev=${issue:8:2}
+    [[ "$file" != *.xml.lzma ]] && continue
 
-            today=$(date +%Y%m%d)
-            if [ "$date" = "$today" ]; then
-                let rev=rev+1
-                rev="0${rev}"
-            else
-                rev="00"
-            fi
+    # Only bump the issue date if it has not been changed manually.
+    git diff --cached --word-diff=porcelain -- "$file" | grep -q "^\+issue=" && continue
 
-            sed -i -r "s/(.* issue=\")[0-9]{10}(\">)/\1${today}${rev: -2}\2/" "$file"
-            git add "$file"
-        fi
+    issue=$(sed -nr 's/.* issue="([0-9]{10})">/\1/p' "$file")
+    date=${issue:0:8}
+    rev=${issue:8:2}
+
+    today=$(date +%Y%m%d)
+    if [ "$date" = "$today" ]; then
+        let rev=rev+1
+        rev="0${rev}"
+    else
+        rev="00"
     fi
+
+    sed -i -r "s/(.* issue=\")[0-9]{10}(\">)/\1${today}${rev: -2}\2/" "$file"
+    git add "$file"
 done

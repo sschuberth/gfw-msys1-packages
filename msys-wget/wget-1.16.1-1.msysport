@@ -14,8 +14,8 @@ src_compile() {
   lndirs
 
   cd ${B}
-  mgwconf --with-ssl=openssl
-  mgwmake
+  mgwconf -C --with-ssl=openssl
+  mgwmake -j 1
 }
 
 #src_install() {
